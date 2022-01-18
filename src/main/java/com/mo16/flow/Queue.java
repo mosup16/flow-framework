@@ -1,0 +1,23 @@
+package com.mo16.flow;
+
+import java.util.List;
+
+public interface Queue<T> {
+    void push(T msg);
+    T poll();
+    List<T> pollChunk(int cSize);
+    void notifySubscriber();
+    void setSubscriber(QueueSubscriber<T> s);
+
+    boolean hasAvailableMessages();
+
+    int countOfAvailableMessages();
+
+
+    static <I> LinkedQueue<I> createLinkedQueue(QueueSubscriber<I> s) {
+        LinkedQueue<I> queue = new LinkedQueue<>();
+        queue.setSubscriber(s);
+        return queue;
+    }
+}
+
