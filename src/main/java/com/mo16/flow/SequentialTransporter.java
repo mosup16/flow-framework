@@ -1,16 +1,18 @@
 package com.mo16.flow;
 
+import java.util.List;
+
 public class SequentialTransporter<T> implements Transporter<T> {
     private Queue<T> queue;
 
     @Override
-    public void setQueue(Queue<T> queue) {
+    public void addQueue(Queue<T> queue) {
         this.queue = queue;
     }
 
     @Override
-    public Queue<T> getQueue() {
-        return this.queue;
+    public List<Queue<T>> getQueues() {
+        return List.of(this.queue);
     }
 
     @Override

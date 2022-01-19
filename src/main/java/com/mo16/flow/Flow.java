@@ -23,21 +23,6 @@ public class Flow<T> {
     }
 
     static <O> Flow<O> of(Iterable<O> iterable) {
-//        Queue<O> dataSourceQueue = new LinkedQueue<>();
-//
-//        Transporter<O> dataSourceTransporter = new SequentialTransporter<>();
-//        dataSourceTransporter.setQueue(dataSourceQueue);
-//
-////        Step<O,O> step = new SequentiallyExecutedStep<>();
-////        step.onNewMessage(o -> o);
-////        step.setQueue(dataSourceQueue);
-////        dataSourceQueue.setSubscriber(step);
-//
-//        DataSource<O> source = DataSource.newIterableDataSource(iterable);
-//        source.setTransporter(dataSourceTransporter);
-//
-//        LinkedList<Step> pipeline = new LinkedList<>();
-////        pipeline.addLast(step);
 
         Flow<O> flow = new Flow<>();
 
@@ -47,7 +32,7 @@ public class Flow<T> {
         source.setTransporter(transporter);
 
         Queue<O> dataSourceQueue = new LinkedQueue<>();
-        transporter.setQueue(dataSourceQueue);
+        transporter.addQueue(dataSourceQueue);
 
 
         flow.source = source;
@@ -90,13 +75,11 @@ public class Flow<T> {
 
             Transporter<O> transporter = new SequentialTransporter<>();
             LinkedQueue<O> queue = new LinkedQueue<>();
-            transporter.setQueue(queue);
+            transporter.addQueue(queue);
             step.setTransporter(transporter);
             newPipeline.add(step);
             newPipelineLastQueues.add(queue);
         }
-//        Queue<T> queueTobeSubscribedTo = this.pipelineLastQueues.get(0);
-
 
         flow.source = this.source;
         flow.dataSourceQueue = this.dataSourceQueue;
@@ -112,7 +95,6 @@ public class Flow<T> {
             sink.setQueue(queue);
             sink.onNewMessage(consumer);
         }
-//        Queue<T> queue = this.pipelineLastQueues;
         source.generate();
     }
 
