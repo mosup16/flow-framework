@@ -1,6 +1,5 @@
 package com.mo16.flow;
 
-import java.util.List;
 import java.util.function.Function;
 
 public interface Step<I,O> extends QueueSubscriber<I>{
@@ -9,4 +8,7 @@ public interface Step<I,O> extends QueueSubscriber<I>{
     Transporter<O> getTransporter();
     void pushToTransporter(O msg);
 
+    Function<I,O> getMessageHandler();
+
+    Step<I,O> copy();
 }

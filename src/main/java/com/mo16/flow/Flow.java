@@ -1,6 +1,7 @@
 package com.mo16.flow;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -9,9 +10,9 @@ public class Flow<T> {
     private DataSource source;
     private Queue dataSourceQueue;
     private LinkedList<Step> pipeline;
-    private Queue<T> pipelineLastQueue;
+    private List<Queue<T>> pipelineLastQueues;
 
-    private Flow(){
+    private Flow() {
 
     }
 
@@ -21,7 +22,7 @@ public class Flow<T> {
         this.pipeline = pipeline;
     }
 
-    static <O> Flow<O> of(Iterable<O> iterable){
+    static <O> Flow<O> of(Iterable<O> iterable) {
 //        Queue<O> dataSourceQueue = new LinkedQueue<>();
 //
 //        Transporter<O> dataSourceTransporter = new SequentialTransporter<>();
@@ -52,12 +53,15 @@ public class Flow<T> {
         flow.source = source;
         flow.pipeline = new LinkedList<>();
         flow.dataSourceQueue = dataSourceQueue;
-        flow.pipelineLastQueue = dataSourceQueue;
+
+        List<Queue<O>> queues = new LinkedList<>();
+        queues.add(dataSourceQueue);
+        flow.pipelineLastQueues = queues;
         return flow;
     }
 
-    public <O> Flow<O> map(Function<T,O> function){
-        Step<T,O> step = new SequentiallyExecutedStep<>();
+    public <O> Flow<O> map(Function<T, O> function) {
+        Step<T, O> step = new SequentiallyExecutedStep<>();
         step.onNewMessage(function);
 
         Flow<O> flow = new Flow<>();
@@ -65,7 +69,7 @@ public class Flow<T> {
         return flow;
     }
 
-    public Flow<T> filter(Predicate<T> predicate){
+    public Flow<T> filter(Predicate<T> predicate) {
         FiltrationStep<T> step = new FiltrationStep<>();
         step.setFilter(predicate);
         step.onNewMessage(t -> t);
@@ -75,32 +79,40 @@ public class Flow<T> {
         return flow;
     }
 
-        private <O> void chainSequentialStep(Step<T, O> step, Flow<O> flow) {
-        step.setQueue(this.pipelineLastQueue);
-        this.pipelineLastQueue.setSubscriber(step);
-
-        Transporter<O> transporter = new SequentialTransporter<>();
-        LinkedQueue<O> queue = new LinkedQueue<>();
-        transporter.setQueue(queue);
-        step.setTransporter(transporter);
-
+    private <O> void chainSequentialStep(Step<T, O> stepTobeChained, Flow<O> flow) {
         LinkedList<Step> newPipeline = new LinkedList<>(this.pipeline);
-        newPipeline.add(step);
+        LinkedList<Queue<O>> newPipelineLastQueues = new LinkedList<>();
+        for (Queue queueTobeSubscribedTo : this.pipelineLastQueues) {
+            Step<T, O> step = stepTobeChained.copy();
+            step.onNewMessage(stepTobeChained.getMessageHandler());
+            step.setQueue(queueTobeSubscribedTo);
+            queueTobeSubscribedTo.setSubscriber(step);
+
+            Transporter<O> transporter = new SequentialTransporter<>();
+            LinkedQueue<O> queue = new LinkedQueue<>();
+            transporter.setQueue(queue);
+            step.setTransporter(transporter);
+            newPipeline.add(step);
+            newPipelineLastQueues.add(queue);
+        }
+//        Queue<T> queueTobeSubscribedTo = this.pipelineLastQueues.get(0);
+
 
         flow.source = this.source;
         flow.dataSourceQueue = this.dataSourceQueue;
         flow.pipeline = newPipeline;
-        flow.pipelineLastQueue = queue;
+        flow.pipelineLastQueues = newPipelineLastQueues;
     }
 
 
-
-    public void forEach(Consumer<T> consumer){
-        SequentialDataSink<T> sink = new SequentialDataSink<>();
-        Queue<T> queue = this.pipelineLastQueue;
-        queue.setSubscriber(sink);
-        sink.setQueue(queue);
-        sink.onNewMessage(consumer);
+    public void forEach(Consumer<T> consumer) {
+        for (Queue queue : this.pipelineLastQueues) {
+            SequentialDataSink<T> sink = new SequentialDataSink<>();
+            queue.setSubscriber(sink);
+            sink.setQueue(queue);
+            sink.onNewMessage(consumer);
+        }
+//        Queue<T> queue = this.pipelineLastQueues;
         source.generate();
     }
 

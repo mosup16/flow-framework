@@ -20,4 +20,14 @@ public class FiltrationStep<I> extends SequentiallyExecutedStep<I, I> {
             } else break;
         }
     }
+
+    @Override
+    public Step<I, I> copy() {
+        FiltrationStep<I> step = new FiltrationStep<>();
+        step.setFilter(filter);
+        step.onNewMessage(super.getMessageHandler());
+        step.setQueue(super.getQueue());
+        step.setTransporter(super.getTransporter());
+        return step;
+    }
 }

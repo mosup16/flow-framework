@@ -67,4 +67,18 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     public void pushToTransporter(O msg) {
         this.transporter.publishMessage(msg);
     }
+
+    @Override
+    public Function<I, O> getMessageHandler() {
+        return this.function;
+    }
+
+    @Override
+    public Step<I, O> copy() {
+        SequentiallyExecutedStep<I, O> step = new SequentiallyExecutedStep<>();
+        step.function = function;
+        step.queue = queue;
+        step.transporter = transporter;
+        return step;
+    }
 }
