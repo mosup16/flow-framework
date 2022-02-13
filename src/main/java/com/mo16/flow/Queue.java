@@ -7,6 +7,9 @@ public interface Queue<T> {
     T poll();
     List<T> pollChunk(int cSize);
     void notifySubscriber();
+
+    QueueSubscriber<T> getSubscriber();
+
     void setSubscriber(QueueSubscriber<T> s);
 
     boolean hasAvailableMessages();

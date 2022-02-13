@@ -1,23 +1,33 @@
 package com.mo16.flow;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
 public class LinkedQueue<T> implements Queue<T> {
 
-    private final LinkedList<T> queue = new LinkedList<>();
+    private final Deque<T> queue;
     private QueueSubscriber subscriber;
 
+    public LinkedQueue() {
+        queue = new LinkedList<T>();
+    }
+
+
+    protected Deque<T> getQueue() {
+        return queue;
+    }
 
     @Override
     public void push(T msg) {
         queue.addLast(msg);
-        notifySubscriber();
+         notifySubscriber();
     }
 
     @Override
     public T poll() {
+        //TODO should handle thrown exception if the data structure is empty properly
         return queue.removeFirst();
     }
 
@@ -37,6 +47,11 @@ public class LinkedQueue<T> implements Queue<T> {
     @Override
     public void notifySubscriber() {
         subscriber.newMessagesArrived(queue.size());
+    }
+
+    @Override
+    public QueueSubscriber<T> getSubscriber() {
+        return subscriber;
     }
 
     @Override
