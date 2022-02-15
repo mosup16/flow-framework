@@ -7,9 +7,9 @@ public interface QueueSubscriber<I> {
 
     Queue<I> getQueue();
 
-    void newMessagesArrived(int numberOfMessages);
+    void startPolling();
 
     I pollMessage();
 
-    List<I> pollMessageChunk(int cSize);
+    void onFlowTerminated();
 }

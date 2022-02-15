@@ -1,9 +1,6 @@
 package com.mo16.flow;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class SequentialDataSink<I> implements DataSink<I> {
     private Queue<I> queue;
@@ -20,7 +17,8 @@ public class SequentialDataSink<I> implements DataSink<I> {
     }
 
     @Override
-    public void newMessagesArrived(int numberOfMessages) {
+    public void startPolling() {
+        int numberOfMessages = getQueue().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++)
             consume(pollMessage());
     }
@@ -41,14 +39,8 @@ public class SequentialDataSink<I> implements DataSink<I> {
     }
 
     @Override
-    public List<I> pollMessageChunk(int cSize) {
-        var list = new ArrayList<I>(cSize);
-        for (int i = 0; i < cSize; i++) {
-            if (queue.hasAvailableMessages())
-                list.add(pollMessage());
-            else break;
-        }
-        return list;
+    public void onFlowTerminated() {
+
     }
 
 }

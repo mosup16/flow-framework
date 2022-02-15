@@ -11,7 +11,8 @@ public class FiltrationStep<I> extends SequentiallyExecutedStep<I, I> {
     }
 
     @Override
-    public void newMessagesArrived(int numberOfMessages) {
+    public void startPolling() {
+        int numberOfMessages = getQueue().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
             if (super.getQueue().hasAvailableMessages()) {
                 I msg = pollMessage();

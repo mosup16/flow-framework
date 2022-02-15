@@ -46,7 +46,7 @@ public class LinkedQueue<T> implements Queue<T> {
 
     @Override
     public void notifySubscriber() {
-        subscriber.newMessagesArrived(queue.size());
+        subscriber.startPolling();
     }
 
     @Override
@@ -67,5 +67,15 @@ public class LinkedQueue<T> implements Queue<T> {
     @Override
     public int countOfAvailableMessages() {
         return queue.size();
+    }
+
+    @Override
+    public void push(MessageContainer<T> message) {
+        if (message.isFlowTerminatorMessage()) {
+            subscriber.onFlowTerminated();
+        } else {
+            queue.addLast(message.getMessage());
+            notifySubscriber();
+        }
     }
 }

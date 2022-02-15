@@ -2,6 +2,9 @@ package com.mo16.flow;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -9,18 +12,14 @@ import java.util.function.Predicate;
 public class Flow<T> {
     private DataSource source;
     private Queue dataSourceQueue;
-    private LinkedList<Step> pipeline;
     private List<Queue<T>> pipelineLastQueues;
+    private ExecutorService executorService;
+    private boolean isParallel = false;
 
     private Flow() {
 
     }
 
-    private Flow(DataSource source, Queue dataSourceQueue, LinkedList<Step> pipeline) {
-        this.source = source;
-        this.dataSourceQueue = dataSourceQueue;
-        this.pipeline = pipeline;
-    }
 
     static <O> Flow<O> of(Iterable<O> iterable) {
 
@@ -36,7 +35,6 @@ public class Flow<T> {
 
 
         flow.source = source;
-        flow.pipeline = new LinkedList<>();
         flow.dataSourceQueue = dataSourceQueue;
 
         List<Queue<O>> queues = new LinkedList<>();
@@ -48,10 +46,39 @@ public class Flow<T> {
     public <O> Flow<O> map(Function<T, O> function) {
         Step<T, O> step = new SequentiallyExecutedStep<>();
         step.onNewMessage(function);
+        return chainSequentialStep(step, this.pipelineLastQueues, this);
+    }
 
-        Flow<O> flow = new Flow<>();
-        chainSequentialStep(step, flow);
+    public boolean isParallel() {
+        return this.isParallel;
+    }
+
+    public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function) {
+        if (isParallel)
+            return map(function);
+        List<Queue<T>> newPipelineLastQueues = new LinkedList<>();
+        for (Queue<T> queue : this.pipelineLastQueues) {
+            // create round-robin transporter
+            var transporter = new RoundRobinParallelTransporter<T>();
+            for (int i = 0; i < numOfThreads; i++)
+                transporter.addQueue(new ParallelQueue<>());
+            newPipelineLastQueues.addAll(transporter.getQueues());
+
+            Step<T, T> s = new SequentiallyExecutedStep<>();
+            s.onNewMessage(t -> t);
+            s.setQueue(queue);
+            queue.setSubscriber(s);
+            s.setTransporter(transporter);
+        }
+
+        executorService = Executors.newFixedThreadPool(numOfThreads);
+        Step<T, T> parallelStep = new ParallelStep<T>(executorService, this.source);
+        parallelStep.onNewMessage(t -> t);
+        Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastQueues, this)
+                .map(function);
+        flow.isParallel = true;
         return flow;
+
     }
 
     public Flow<T> filter(Predicate<T> predicate) {
@@ -59,15 +86,14 @@ public class Flow<T> {
         step.setFilter(predicate);
         step.onNewMessage(t -> t);
 
-        Flow<T> flow = new Flow<>();
-        chainSequentialStep(step, flow);
-        return flow;
+        return chainSequentialStep(step, this.pipelineLastQueues, this);
     }
 
-    private <O> void chainSequentialStep(Step<T, O> stepTobeChained, Flow<O> flow) {
-        LinkedList<Step> newPipeline = new LinkedList<>(this.pipeline);
+    private <O> Flow<O> chainSequentialStep(Step<T, O> stepTobeChained,
+                                            List<Queue<T>> pipelineLastQueues, Flow<T> sourceFlow) {
+        Flow<O> flow = new Flow<>();
         LinkedList<Queue<O>> newPipelineLastQueues = new LinkedList<>();
-        for (Queue queueTobeSubscribedTo : this.pipelineLastQueues) {
+        for (Queue queueTobeSubscribedTo : pipelineLastQueues) {
             Step<T, O> step = stepTobeChained.copy();
             step.onNewMessage(stepTobeChained.getMessageHandler());
             step.setQueue(queueTobeSubscribedTo);
@@ -77,14 +103,15 @@ public class Flow<T> {
             LinkedQueue<O> queue = new LinkedQueue<>();
             transporter.addQueue(queue);
             step.setTransporter(transporter);
-            newPipeline.add(step);
             newPipelineLastQueues.add(queue);
         }
 
-        flow.source = this.source;
-        flow.dataSourceQueue = this.dataSourceQueue;
-        flow.pipeline = newPipeline;
+        flow.source = sourceFlow.source;
+        flow.dataSourceQueue = sourceFlow.dataSourceQueue;
         flow.pipelineLastQueues = newPipelineLastQueues;
+        flow.isParallel = sourceFlow.isParallel;
+        flow.executorService = sourceFlow.executorService;
+        return flow;
     }
 
 
@@ -96,6 +123,17 @@ public class Flow<T> {
             sink.onNewMessage(consumer);
         }
         source.generate();
+        if (isParallel) {
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(1L, TimeUnit.DAYS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("executorService.isTerminated() = " + executorService.isTerminated());
+        }
+
+
     }
 
 }

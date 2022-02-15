@@ -1,7 +1,5 @@
 package com.mo16.flow;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 
 // a step designed to be executed in a sequential manner
@@ -10,6 +8,12 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     private Queue<I> queue;
     private Transporter<O> transporter;
     private Function<I, O> function;
+    private boolean isFlowTerminated;
+    private MessageContainer<O> outputContainer;
+
+    public SequentiallyExecutedStep(){
+        this.outputContainer = new DefaultMessageContainer<>();
+    }
 
     @Override
     public void setQueue(Queue<I> queue) {
@@ -22,15 +26,32 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     }
 
     @Override
-    public void newMessagesArrived(int numberOfMessages) {
+    public void startPolling() {
+        int numberOfMessages = getQueue().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
             if (queue.hasAvailableMessages()) {
                 O output = function.apply(pollMessage());
                 transporter.publishMessage(output);
             } else break;
         }
+        if(isFlowTerminated){
+            while (queue.hasAvailableMessages()) { //clean the queue
+                O output = function.apply(pollMessage());
+                transporter.publishMessage(output);
+            }
+            // forward the termination message
+            MessageContainer<O> container = getOutputMessageContainer();
+            container.setTerminationMessageCondition(true);
+            container.setMessage(null);
+            transporter.publishMessage(container);
+        }
+
     }
 
+    @Override
+    public MessageContainer<O> getOutputMessageContainer(){
+        return this.outputContainer;
+    }
     @Override
     public void onNewMessage(Function<I, O> function) {
         this.function = function;
@@ -43,14 +64,8 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     }
 
     @Override
-    public List<I> pollMessageChunk(int cSize) {
-        var list = new ArrayList<I>(cSize);
-        for (int i = 0; i < cSize; i++) {
-            if (queue.hasAvailableMessages())
-                list.add(pollMessage());
-            else break;
-        }
-        return list;
+    public void onFlowTerminated() {
+        this.isFlowTerminated = true;
     }
 
     @Override
@@ -61,11 +76,6 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     @Override
     public Transporter<O> getTransporter() {
         return this.transporter;
-    }
-
-    @Override
-    public void pushToTransporter(O msg) {
-        this.transporter.publishMessage(msg);
     }
 
     @Override
