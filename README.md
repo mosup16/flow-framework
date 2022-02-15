@@ -21,7 +21,7 @@ a framework that implements reactive programming model
 #### The liberary exposes a very familiar api and it can be used as follows.
 
             Flow.of(data)
-                .parallelMap(999, func)
+                .parallelMap(16, func)
                 .filter(integer -> integer > 40)
                 .map(integer -> "hi : " + integer)
                 .forEach(x -> System.out.println(Thread.currentThread().getId() + " :" + x));
