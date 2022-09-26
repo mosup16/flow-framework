@@ -25,3 +25,5 @@ a framework that implements reactive programming model
                 .filter(integer -> integer > 40)
                 .map(integer -> "hi : " + integer)
                 .forEach(x -> System.out.println(Thread.currentThread().getId() + " :" + x));
+
+Thanks for reading.
