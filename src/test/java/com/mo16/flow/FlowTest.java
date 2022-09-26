@@ -1,5 +1,6 @@
 package com.mo16.flow;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -8,7 +9,8 @@ import java.util.List;
 class FlowTest {
 
     @Test
-    void test_basic_list_iteration(){
+    @DisplayName("test iteration with forEach()")
+    void testListIteration(){
         //given
         List<Integer> testInput = List.of(1, 2, 3, 4, 5, 6);
         List<Integer> res = new ArrayList<>();
@@ -24,7 +26,8 @@ class FlowTest {
     }
 
     @Test
-    void test_basic_list_transformation(){
+    @DisplayName("test list transformation with map()")
+    void testTransformation(){
         //given
         List<Integer> expected = List.of(2, 3, 4, 5, 6, 7);
 
@@ -41,7 +44,8 @@ class FlowTest {
     }
 
     @Test
-    void test_basic_list_filtration(){
+    @DisplayName("test list filtration with filter()")
+    void testListFiltration(){
         //given
         List<Integer> expected = List.of(4, 5,6);
         List<Integer> res = new ArrayList<>();
