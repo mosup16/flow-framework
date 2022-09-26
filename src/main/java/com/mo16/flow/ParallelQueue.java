@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class ParallelQueue<T> extends LinkedQueue<T> {
+public class ParallelQueue<T> implements Queue<T> {
 
     private boolean isSubscriberStarted;
     private BlockingQueue<T> queue;
@@ -19,7 +19,7 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
     @Override
     public void push(T msg) {
         try {
-            queue.put(msg);
+            getBlockingQueue().put(msg);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -29,14 +29,33 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
         }
     }
 
+    private BlockingQueue<T> getBlockingQueue() {
+        return queue;
+    }
+
     @Override
     public T poll() {
         try {
-            return queue.poll(100, TimeUnit.MILLISECONDS);
+            return getBlockingQueue().poll(100, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public void notifySubscriber() {
+        getSubscriber().startPolling();
+    }
+
+    @Override
+    public QueueSubscriber<T> getSubscriber() {
+        return null;
+    }
+
+    @Override
+    public void setSubscriber(QueueSubscriber<T> s) {
+
     }
 
     @Override
@@ -47,7 +66,7 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
 
         } else {
             try {
-                queue.put(message.getMessage());
+                getBlockingQueue().put(message.getMessage());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -60,20 +79,17 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
 
     @Override
     public boolean hasAvailableMessages() {
-        System.out.println(!queue.isEmpty() + "  " + isTerminated);
-        return !queue.isEmpty();
+        return !getBlockingQueue().isEmpty();
     }
 
     @Override
-    public QueueSubscriber<T> getSubscriber() {
-        return super.getSubscriber();
+    public int countOfAvailableMessages() {
+        return 0;
     }
+
 
     public void startSubscriber(){
         ((ParallelStep) this.getSubscriber()).startPolling();
     }
 
-    public void stopSubscriber(){
-        ((ParallelStep) this.getSubscriber()).stop();
-    }
 }

@@ -1,13 +1,11 @@
 package com.mo16.flow;
 
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 
-public class LinkedQueue<T> implements Queue<T> {
+public class LinkedQueue<T> extends AbstractQueue<T> {
 
-    private final Deque<T> queue;
+    protected final Deque<T> queue;
     private QueueSubscriber subscriber;
 
     public LinkedQueue() {
@@ -21,32 +19,39 @@ public class LinkedQueue<T> implements Queue<T> {
 
     @Override
     public void push(T msg) {
-        queue.addLast(msg);
+        getQueue().addLast(msg);
          notifySubscriber();
     }
 
     @Override
     public T poll() {
         //TODO should handle thrown exception if the data structure is empty properly
-        return queue.removeFirst();
-    }
-
-    @Override
-    public List<T> pollChunk(int cSize) {
-        var list = new ArrayList<T>(cSize);
-        for (int i = 0; i < cSize; i++) {
-            if (queue.isEmpty())
-                break;
-            else
-                list.add(poll());
-        }
-        notifySubscriber();
-        return list;
+        return getQueue().removeFirst();
     }
 
     @Override
     public void notifySubscriber() {
-        subscriber.startPolling();
+        getSubscriber().startPolling();
+    }
+
+    @Override
+    public boolean hasAvailableMessages() {
+        return !getQueue().isEmpty();
+    }
+
+    @Override
+    public int countOfAvailableMessages() {
+        return getQueue().size();
+    }
+
+    @Override
+    public void push(MessageContainer<T> message) {
+        if (message.isFlowTerminatorMessage()) {
+            getSubscriber().onFlowTerminated();
+        } else {
+            getQueue().addLast(message.getMessage());
+            notifySubscriber();
+        }
     }
 
     @Override
@@ -57,25 +62,5 @@ public class LinkedQueue<T> implements Queue<T> {
     @Override
     public void setSubscriber(QueueSubscriber<T> s) {
         this.subscriber = s;
-    }
-
-    @Override
-    public boolean hasAvailableMessages() {
-        return !queue.isEmpty();
-    }
-
-    @Override
-    public int countOfAvailableMessages() {
-        return queue.size();
-    }
-
-    @Override
-    public void push(MessageContainer<T> message) {
-        if (message.isFlowTerminatorMessage()) {
-            subscriber.onFlowTerminated();
-        } else {
-            queue.addLast(message.getMessage());
-            notifySubscriber();
-        }
     }
 }
