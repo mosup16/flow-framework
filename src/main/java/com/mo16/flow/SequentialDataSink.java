@@ -3,17 +3,17 @@ package com.mo16.flow;
 import java.util.function.Consumer;
 
 public class SequentialDataSink<I> implements DataSink<I> {
-    private Queue<I> queue;
+    private Channel<I> channel;
     private Consumer<I> consumer;
 
     @Override
-    public void setQueue(Queue<I> queue) {
-        this.queue = queue;
+    public void setQueue(Channel<I> channel) {
+        this.channel = channel;
     }
 
     @Override
-    public Queue<I> getQueue() {
-        return this.queue;
+    public Channel<I> getQueue() {
+        return this.channel;
     }
 
     @Override

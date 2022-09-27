@@ -5,7 +5,7 @@ import java.util.function.Function;
 // a step designed to be executed in a sequential manner
 public class SequentialStep<I, O> implements Step<I, O> {
 
-    private Queue<I> queue;
+    private Channel<I> channel;
     private Transporter<O> transporter;
     private Function<I, O> function;
 
@@ -13,20 +13,20 @@ public class SequentialStep<I, O> implements Step<I, O> {
     }
 
     @Override
-    public void setQueue(Queue<I> queue) {
-        this.queue = queue;
+    public void setQueue(Channel<I> channel) {
+        this.channel = channel;
     }
 
     @Override
-    public Queue<I> getQueue() {
-        return this.queue;
+    public Channel<I> getQueue() {
+        return this.channel;
     }
 
     @Override
     public void startPolling() {
         int numberOfMessages = getQueue().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
-            if (queue.hasAvailableMessages()) {
+            if (channel.hasAvailableMessages()) {
                 O output = function.apply(pollMessage());
                 transporter.publishMessage(output);
             } else break;
@@ -63,7 +63,7 @@ public class SequentialStep<I, O> implements Step<I, O> {
     public Step<I, O> copy() {
         SequentialStep<I, O> step = new SequentialStep<>();
         step.function = function;
-        step.queue = queue;
+        step.channel = channel;
         step.transporter = transporter;
         return step;
     }

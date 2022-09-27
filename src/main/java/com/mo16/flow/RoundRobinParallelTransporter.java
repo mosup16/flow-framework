@@ -4,23 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoundRobinParallelTransporter<T> implements Transporter<T> {
-    private List<Queue<T>> queues = new ArrayList<>();
+    private List<Channel<T>> channels = new ArrayList<>();
     private int nextQueue = 0;
 
     @Override
-    public void addQueue(Queue<T> queue) {
-        this.queues.add(queue);
+    public void addChannel(Channel<T> channel) {
+        this.channels.add(channel);
     }
 
     @Override
-    public List<Queue<T>> getQueues() {
-        return queues;
+    public List<Channel<T>> getChannels() {
+        return channels;
     }
 
     @Override
     public void publishMessage(T msg) {
-        nextQueue = nextQueue % this.queues.size();
-        queues.get(nextQueue).push(msg);
+        nextQueue = nextQueue % this.channels.size();
+        channels.get(nextQueue).push(msg);
         nextQueue++;
 
     }

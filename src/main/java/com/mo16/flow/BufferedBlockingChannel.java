@@ -4,12 +4,12 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class ParallelQueue<T> extends LinkedQueue<T> {
+public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
 
     private boolean isSubscriberStarted;
     private final BlockingQueue<T> queue;
 
-    public ParallelQueue() {
+    public BufferedBlockingChannel() {
         isSubscriberStarted = false;
 
         queue = new ArrayBlockingQueue<>(1024);

@@ -3,8 +3,8 @@ package com.mo16.flow;
 import java.util.List;
 
 public interface Transporter<T> {
-    void addQueue(Queue<T> queue);
-    List<Queue<T>> getQueues();
+    void addChannel(Channel<T> channel);
+    List<Channel<T>> getChannels();
     void publishMessage(T msg);
 
 }

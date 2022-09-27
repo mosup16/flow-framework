@@ -3,12 +3,12 @@ package com.mo16.flow;
 import java.util.Deque;
 import java.util.LinkedList;
 
-public class LinkedQueue<T> implements Queue<T> {
+public class SingularMessageChannel<T> implements Channel<T> {
 
     private final Deque<T> queue;
     private QueueSubscriber<T> subscriber;
 
-    public LinkedQueue() {
+    public SingularMessageChannel() {
         queue = new LinkedList<>();
     }
 

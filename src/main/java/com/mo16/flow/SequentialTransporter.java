@@ -3,23 +3,23 @@ package com.mo16.flow;
 import java.util.List;
 
 public class SequentialTransporter<T> implements Transporter<T> {
-    private Queue<T> queue;
+    private Channel<T> channel;
 
     public SequentialTransporter(){
     }
 
     @Override
-    public void addQueue(Queue<T> queue) {
-        this.queue = queue;
+    public void addChannel(Channel<T> channel) {
+        this.channel = channel;
     }
 
     @Override
-    public List<Queue<T>> getQueues() {
-        return List.of(this.queue);
+    public List<Channel<T>> getChannels() {
+        return List.of(this.channel);
     }
 
     @Override
     public void publishMessage(T msg) {
-        queue.push(msg);
+        channel.push(msg);
     }
 }

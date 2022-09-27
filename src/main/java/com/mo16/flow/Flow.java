@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 
 public class Flow<T> {
     private DataSource source;
-    private Queue dataSourceQueue;
-    private List<Queue<T>> pipelineLastQueues;
+    private Channel dataSourceChannel;
+    private List<Channel<T>> pipelineLastChannels;
     private ExecutorService executorService;
     private boolean isParallel = false;
 
@@ -30,23 +30,23 @@ public class Flow<T> {
         Transporter<O> transporter = new SequentialTransporter<>();
         source.setTransporter(transporter);
 
-        Queue<O> dataSourceQueue = new LinkedQueue<>();
-        transporter.addQueue(dataSourceQueue);
+        Channel<O> dataSourceChannel = new SingularMessageChannel<>();
+        transporter.addChannel(dataSourceChannel);
 
 
         flow.source = source;
-        flow.dataSourceQueue = dataSourceQueue;
+        flow.dataSourceChannel = dataSourceChannel;
 
-        List<Queue<O>> queues = new LinkedList<>();
-        queues.add(dataSourceQueue);
-        flow.pipelineLastQueues = queues;
+        List<Channel<O>> channels = new LinkedList<>();
+        channels.add(dataSourceChannel);
+        flow.pipelineLastChannels = channels;
         return flow;
     }
 
     public <O> Flow<O> map(Function<T, O> function) {
         Step<T, O> step = new SequentialStep<>();
         step.onNewMessage(function);
-        return chainSequentialStep(step, this.pipelineLastQueues, this);
+        return chainSequentialStep(step, this.pipelineLastChannels, this);
     }
 
     public boolean isParallel() {
@@ -56,25 +56,25 @@ public class Flow<T> {
     public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function) {
         if (isParallel)
             return map(function);
-        List<Queue<T>> newPipelineLastQueues = new LinkedList<>();
-        for (Queue<T> queue : this.pipelineLastQueues) {
+        List<Channel<T>> newPipelineLastChannels = new LinkedList<>();
+        for (Channel<T> channel : this.pipelineLastChannels) {
             // create round-robin transporter
             var transporter = new RoundRobinParallelTransporter<T>();
             for (int i = 0; i < numOfThreads; i++)
-                transporter.addQueue(new ParallelQueue<>());
-            newPipelineLastQueues.addAll(transporter.getQueues());
+                transporter.addChannel(new BufferedBlockingChannel<>());
+            newPipelineLastChannels.addAll(transporter.getChannels());
 
             Step<T, T> s = new SequentialStep<>();
             s.onNewMessage(t -> t);
-            s.setQueue(queue);
-            queue.setSubscriber(s);
+            s.setQueue(channel);
+            channel.setSubscriber(s);
             s.setTransporter(transporter);
         }
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
         Step<T, T> parallelStep = new ParallelizedStep<T>(executorService, this.source);
         parallelStep.onNewMessage(t -> t);
-        Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastQueues, this)
+        Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);
         flow.isParallel = true;
         return flow;
@@ -86,29 +86,29 @@ public class Flow<T> {
         step.setFilter(predicate);
         step.onNewMessage(t -> t);
 
-        return chainSequentialStep(step, this.pipelineLastQueues, this);
+        return chainSequentialStep(step, this.pipelineLastChannels, this);
     }
 
     private <O> Flow<O> chainSequentialStep(Step<T, O> stepTobeChained,
-                                            List<Queue<T>> pipelineLastQueues, Flow<T> sourceFlow) {
+                                            List<Channel<T>> pipelineLastChannels, Flow<T> sourceFlow) {
         Flow<O> flow = new Flow<>();
-        LinkedList<Queue<O>> newPipelineLastQueues = new LinkedList<>();
-        for (Queue queueTobeSubscribedTo : pipelineLastQueues) {
+        LinkedList<Channel<O>> newPipelineLastChannels = new LinkedList<>();
+        for (Channel channelTobeSubscribedTo : pipelineLastChannels) {
             Step<T, O> step = stepTobeChained.copy();
             step.onNewMessage(stepTobeChained.getMessageHandler());
-            step.setQueue(queueTobeSubscribedTo);
-            queueTobeSubscribedTo.setSubscriber(step);
+            step.setQueue(channelTobeSubscribedTo);
+            channelTobeSubscribedTo.setSubscriber(step);
 
             Transporter<O> transporter = new SequentialTransporter<>();
-            LinkedQueue<O> queue = new LinkedQueue<>();
-            transporter.addQueue(queue);
+            SingularMessageChannel<O> queue = new SingularMessageChannel<>();
+            transporter.addChannel(queue);
             step.setTransporter(transporter);
-            newPipelineLastQueues.add(queue);
+            newPipelineLastChannels.add(queue);
         }
 
         flow.source = sourceFlow.source;
-        flow.dataSourceQueue = sourceFlow.dataSourceQueue;
-        flow.pipelineLastQueues = newPipelineLastQueues;
+        flow.dataSourceChannel = sourceFlow.dataSourceChannel;
+        flow.pipelineLastChannels = newPipelineLastChannels;
         flow.isParallel = sourceFlow.isParallel;
         flow.executorService = sourceFlow.executorService;
         return flow;
@@ -116,10 +116,10 @@ public class Flow<T> {
 
 
     public void forEach(Consumer<T> consumer) {
-        for (Queue queue : this.pipelineLastQueues) {
+        for (Channel channel : this.pipelineLastChannels) {
             SequentialDataSink<T> sink = new SequentialDataSink<>();
-            queue.setSubscriber(sink);
-            sink.setQueue(queue);
+            channel.setSubscriber(sink);
+            sink.setQueue(channel);
             sink.onNewMessage(consumer);
         }
         source.generate();

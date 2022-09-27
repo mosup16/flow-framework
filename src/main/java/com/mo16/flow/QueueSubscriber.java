@@ -1,11 +1,9 @@
 package com.mo16.flow;
 
-import java.util.List;
-
 public interface QueueSubscriber<I> {
-    void setQueue(Queue<I> queue);
+    void setQueue(Channel<I> channel);
 
-    Queue<I> getQueue();
+    Channel<I> getQueue();
 
     void startPolling();
 

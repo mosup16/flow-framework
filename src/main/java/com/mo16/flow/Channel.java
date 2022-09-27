@@ -1,7 +1,7 @@
 package com.mo16.flow;
 
 
-public interface Queue<T> {
+public interface Channel<T> {
     void push(T msg);
 
     T poll();
@@ -17,8 +17,8 @@ public interface Queue<T> {
     int countOfAvailableMessages();
 
 
-    static <I> LinkedQueue<I> createLinkedQueue(QueueSubscriber<I> s) {
-        LinkedQueue<I> queue = new LinkedQueue<>();
+    static <I> SingularMessageChannel<I> createLinkedQueue(QueueSubscriber<I> s) {
+        SingularMessageChannel<I> queue = new SingularMessageChannel<>();
         queue.setSubscriber(s);
         return queue;
     }

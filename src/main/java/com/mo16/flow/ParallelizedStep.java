@@ -27,7 +27,7 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
 
     @Override
     public void startPolling() {
-        consumer = new Consumer<>((ParallelQueue<T>) getQueue(),
+        consumer = new Consumer<>((BufferedBlockingChannel<T>) getQueue(),
                 getTransporter(), getMessageHandler());
 
         executorService.submit(consumer);
@@ -36,11 +36,11 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
     static class Consumer<I, O> implements Runnable {
 
         private boolean isDone = false;
-        private final ParallelQueue<I> queue;
+        private final BufferedBlockingChannel<I> queue;
         private final Function<I, O> messageHandler;
         private final Transporter<O> transporter;
 
-        public Consumer(ParallelQueue<I> queue, Transporter<O> transporter,
+        public Consumer(BufferedBlockingChannel<I> queue, Transporter<O> transporter,
                         Function<I, O> messageHandler) {
             this.queue = queue;
             this.messageHandler = messageHandler;
