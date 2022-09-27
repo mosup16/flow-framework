@@ -9,7 +9,7 @@ package com.mo16.flow;
 public class SingularMessageChannel<T> implements Channel<T> {
 
     private T message;
-    private QueueSubscriber<T> subscriber;
+    private ChannelSubscriber<T> subscriber;
 
     public SingularMessageChannel() {
     }
@@ -33,12 +33,12 @@ public class SingularMessageChannel<T> implements Channel<T> {
     }
 
     @Override
-    public QueueSubscriber<T> getSubscriber() {
+    public ChannelSubscriber<T> getSubscriber() {
         return subscriber;
     }
 
     @Override
-    public void setSubscriber(QueueSubscriber<T> s) {
+    public void setSubscriber(ChannelSubscriber<T> s) {
         this.subscriber = s;
     }
 

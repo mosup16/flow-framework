@@ -1,9 +1,7 @@
 package com.mo16.flow;
 
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public interface DataSink<I> extends QueueSubscriber<I> {
+public interface DataSink<I> extends ChannelSubscriber<I> {
     void onNewMessage(Consumer<I> consumer);
 }

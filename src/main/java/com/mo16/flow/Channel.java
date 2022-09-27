@@ -8,16 +8,16 @@ public interface Channel<T> {
 
     void notifySubscriber();
 
-    QueueSubscriber<T> getSubscriber();
+    ChannelSubscriber<T> getSubscriber();
 
-    void setSubscriber(QueueSubscriber<T> s);
+    void setSubscriber(ChannelSubscriber<T> s);
 
     boolean hasAvailableMessages();
 
     int countOfAvailableMessages();
 
 
-    static <I> SingularMessageChannel<I> createLinkedQueue(QueueSubscriber<I> s) {
+    static <I> SingularMessageChannel<I> createLinkedQueue(ChannelSubscriber<I> s) {
         SingularMessageChannel<I> queue = new SingularMessageChannel<>();
         queue.setSubscriber(s);
         return queue;

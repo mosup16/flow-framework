@@ -46,7 +46,7 @@ public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
     }
 
     @Override
-    public QueueSubscriber<T> getSubscriber() {
+    public ChannelSubscriber<T> getSubscriber() {
         return super.getSubscriber();
     }
 
