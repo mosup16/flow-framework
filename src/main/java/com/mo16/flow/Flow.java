@@ -44,7 +44,7 @@ public class Flow<T> {
     }
 
     public <O> Flow<O> map(Function<T, O> function) {
-        Step<T, O> step = new SequentiallyExecutedStep<>();
+        Step<T, O> step = new SequentialStep<>();
         step.onNewMessage(function);
         return chainSequentialStep(step, this.pipelineLastQueues, this);
     }
@@ -64,7 +64,7 @@ public class Flow<T> {
                 transporter.addQueue(new ParallelQueue<>());
             newPipelineLastQueues.addAll(transporter.getQueues());
 
-            Step<T, T> s = new SequentiallyExecutedStep<>();
+            Step<T, T> s = new SequentialStep<>();
             s.onNewMessage(t -> t);
             s.setQueue(queue);
             queue.setSubscriber(s);
@@ -72,7 +72,7 @@ public class Flow<T> {
         }
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
-        Step<T, T> parallelStep = new ParallelStep<T>(executorService, this.source);
+        Step<T, T> parallelStep = new ParallelizedStep<T>(executorService, this.source);
         parallelStep.onNewMessage(t -> t);
         Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastQueues, this)
                 .map(function);

@@ -51,7 +51,7 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
     }
 
     public void startSubscriber() {
-        ((ParallelStep) this.getSubscriber()).startPolling();
+        ((ParallelizedStep) this.getSubscriber()).startPolling();
     }
 
 }

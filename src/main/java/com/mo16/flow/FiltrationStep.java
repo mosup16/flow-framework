@@ -2,7 +2,7 @@ package com.mo16.flow;
 
 import java.util.function.Predicate;
 
-public class FiltrationStep<I> extends SequentiallyExecutedStep<I, I> {
+public class FiltrationStep<I> extends SequentialStep<I, I> {
 
     private Predicate<I> filter;
 

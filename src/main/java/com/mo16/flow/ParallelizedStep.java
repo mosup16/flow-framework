@@ -3,20 +3,20 @@ package com.mo16.flow;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-public class ParallelStep<T> extends SequentiallyExecutedStep<T, T> {
+public class ParallelizedStep<T> extends SequentialStep<T, T> {
     private ExecutorService executorService;
     private final DataSource source;
     private int counter = 0;
     private Consumer<T, T> consumer;
 
-    public ParallelStep(ExecutorService executorService, DataSource source) {
+    public ParallelizedStep(ExecutorService executorService, DataSource source) {
         this.executorService = executorService;
         this.source = source;
     }
 
     @Override
     public Step<T, T> copy() {
-        ParallelStep<T> step = new ParallelStep<>(this.executorService, this.source);
+        ParallelizedStep<T> step = new ParallelizedStep<>(this.executorService, this.source);
         step.onNewMessage(this.getMessageHandler());
 
         step.setQueue(this.getQueue());

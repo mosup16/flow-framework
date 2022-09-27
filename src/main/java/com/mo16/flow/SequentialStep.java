@@ -3,13 +3,13 @@ package com.mo16.flow;
 import java.util.function.Function;
 
 // a step designed to be executed in a sequential manner
-public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
+public class SequentialStep<I, O> implements Step<I, O> {
 
     private Queue<I> queue;
     private Transporter<O> transporter;
     private Function<I, O> function;
 
-    public SequentiallyExecutedStep(){
+    public SequentialStep(){
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
 
     @Override
     public Step<I, O> copy() {
-        SequentiallyExecutedStep<I, O> step = new SequentiallyExecutedStep<>();
+        SequentialStep<I, O> step = new SequentialStep<>();
         step.function = function;
         step.queue = queue;
         step.transporter = transporter;
