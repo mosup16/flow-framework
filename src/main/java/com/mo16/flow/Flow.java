@@ -126,7 +126,9 @@ public class Flow<T> {
         if (isParallel) {
             executorService.shutdown();
             try {
-                executorService.awaitTermination(1L, TimeUnit.DAYS);
+                boolean isTerminated = false;
+                while (!isTerminated)
+                    isTerminated = executorService.awaitTermination(100L, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
