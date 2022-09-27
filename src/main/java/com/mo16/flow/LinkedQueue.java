@@ -15,10 +15,6 @@ public class LinkedQueue<T> implements Queue<T> {
     }
 
 
-    protected Deque<T> getQueue() {
-        return queue;
-    }
-
     @Override
     public void push(T msg) {
         queue.addLast(msg);
