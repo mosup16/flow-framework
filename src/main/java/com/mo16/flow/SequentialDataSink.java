@@ -38,9 +38,5 @@ public class SequentialDataSink<I> implements DataSink<I> {
         return this.getQueue().poll();
     }
 
-    @Override
-    public void onFlowTerminated() {
-
-    }
 
 }

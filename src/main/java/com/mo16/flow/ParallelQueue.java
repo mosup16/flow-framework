@@ -8,7 +8,6 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
 
     private boolean isSubscriberStarted;
     private BlockingQueue<T> queue;
-    private boolean isTerminated;
 
     public ParallelQueue() {
         isSubscriberStarted = false;
@@ -39,28 +38,10 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
         return null;
     }
 
-    @Override
-    public void push(MessageContainer<T> message) {
-        if (message.isFlowTerminatorMessage()) {
-            getSubscriber().onFlowTerminated();
-            isTerminated = true;
 
-        } else {
-            try {
-                queue.put(message.getMessage());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if (!this.isSubscriberStarted) {
-                startSubscriber();
-                this.isSubscriberStarted = true;
-            }
-        }
-    }
 
     @Override
     public boolean hasAvailableMessages() {
-        System.out.println(!queue.isEmpty() + "  " + isTerminated);
         return !queue.isEmpty();
     }
 
@@ -69,11 +50,8 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
         return super.getSubscriber();
     }
 
-    public void startSubscriber(){
+    public void startSubscriber() {
         ((ParallelStep) this.getSubscriber()).startPolling();
     }
 
-    public void stopSubscriber(){
-        ((ParallelStep) this.getSubscriber()).stop();
-    }
 }

@@ -8,11 +8,8 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     private Queue<I> queue;
     private Transporter<O> transporter;
     private Function<I, O> function;
-    private boolean isFlowTerminated;
-    private MessageContainer<O> outputContainer;
 
     public SequentiallyExecutedStep(){
-        this.outputContainer = new DefaultMessageContainer<>();
     }
 
     @Override
@@ -34,24 +31,8 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
                 transporter.publishMessage(output);
             } else break;
         }
-        if(isFlowTerminated){
-            while (queue.hasAvailableMessages()) { //clean the queue
-                O output = function.apply(pollMessage());
-                transporter.publishMessage(output);
-            }
-            // forward the termination message
-            MessageContainer<O> container = getOutputMessageContainer();
-            container.setTerminationMessageCondition(true);
-            container.setMessage(null);
-            transporter.publishMessage(container);
-        }
-
     }
 
-    @Override
-    public MessageContainer<O> getOutputMessageContainer(){
-        return this.outputContainer;
-    }
     @Override
     public void onNewMessage(Function<I, O> function) {
         this.function = function;
@@ -61,11 +42,6 @@ public class SequentiallyExecutedStep<I, O> implements Step<I, O> {
     @Override
     public I pollMessage() {
         return this.getQueue().poll();
-    }
-
-    @Override
-    public void onFlowTerminated() {
-        this.isFlowTerminated = true;
     }
 
     @Override

@@ -10,7 +10,5 @@ public interface DataSource<O> {
         return new iterableDataSource<>(iterable);
     }
 
-    MessageContainer<O> getMessageContainer();
-
     boolean isCompleted();
 }

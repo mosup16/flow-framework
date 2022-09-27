@@ -69,13 +69,4 @@ public class LinkedQueue<T> implements Queue<T> {
         return queue.size();
     }
 
-    @Override
-    public void push(MessageContainer<T> message) {
-        if (message.isFlowTerminatorMessage()) {
-            subscriber.onFlowTerminated();
-        } else {
-            queue.addLast(message.getMessage());
-            notifySubscriber();
-        }
-    }
 }

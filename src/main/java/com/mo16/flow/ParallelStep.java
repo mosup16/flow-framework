@@ -8,38 +8,23 @@ public class ParallelStep<T> extends SequentiallyExecutedStep<T, T> {
     private final DataSource source;
     private int counter = 0;
     private Consumer<T, T> consumer;
-    private MessageContainer<T> container;
 
     public ParallelStep(ExecutorService executorService, DataSource source) {
         this.executorService = executorService;
         this.source = source;
-        container = new DefaultMessageContainer<>();
     }
 
     @Override
     public Step<T, T> copy() {
         ParallelStep<T> step = new ParallelStep<>(this.executorService, this.source);
         step.onNewMessage(this.getMessageHandler());
-        ;
+
         step.setQueue(this.getQueue());
         step.setTransporter(this.getTransporter());
         return step;
     }
 
-    @Override
-    public void onFlowTerminated() {
-        stop();
-    }
 
-    @Override
-    public MessageContainer<T> getOutputMessageContainer() {
-        return this.container;
-    }
-
-    public void stop() {
-        if (consumer != null)
-            consumer.stop();
-    }
 
     @Override
     public void startPolling() {
@@ -76,6 +61,7 @@ public class ParallelStep<T> extends SequentiallyExecutedStep<T, T> {
                 O output = messageHandler.apply(input);
                 transporter.publishMessage(output);
             }
+
         }
 
         void stop() {

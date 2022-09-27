@@ -10,6 +10,4 @@ public interface QueueSubscriber<I> {
     void startPolling();
 
     I pollMessage();
-
-    void onFlowTerminated();
 }
