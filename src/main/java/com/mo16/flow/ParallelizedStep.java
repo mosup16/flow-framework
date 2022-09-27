@@ -4,9 +4,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
 public class ParallelizedStep<T> extends SequentialStep<T, T> {
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     private final DataSource source;
-    private int counter = 0;
     private Consumer<T, T> consumer;
 
     public ParallelizedStep(ExecutorService executorService, DataSource source) {
@@ -37,9 +36,9 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
     static class Consumer<I, O> implements Runnable {
 
         private boolean isDone = false;
-        private ParallelQueue<I> queue;
-        private Function<I, O> messageHandler;
-        private Transporter<O> transporter;
+        private final ParallelQueue<I> queue;
+        private final Function<I, O> messageHandler;
+        private final Transporter<O> transporter;
 
         public Consumer(ParallelQueue<I> queue, Transporter<O> transporter,
                         Function<I, O> messageHandler) {
