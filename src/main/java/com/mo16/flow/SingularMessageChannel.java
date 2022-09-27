@@ -1,28 +1,30 @@
 package com.mo16.flow;
 
-import java.util.Deque;
-import java.util.LinkedList;
 
+/**
+ * a channel that contains a single message at a time.
+ * The channel implementation blocks till the subscriber processing of the message is over.
+ * @param <T> the type of messages allowed
+ */
 public class SingularMessageChannel<T> implements Channel<T> {
 
-    private final Deque<T> queue;
+    private T message;
     private QueueSubscriber<T> subscriber;
 
     public SingularMessageChannel() {
-        queue = new LinkedList<>();
     }
 
 
     @Override
     public void push(T msg) {
-        queue.addLast(msg);
-         notifySubscriber();
+        message = msg;
+        notifySubscriber();
     }
 
     @Override
     public T poll() {
         //TODO should handle thrown exception if the data structure is empty properly
-        return queue.removeFirst();
+        return message;
     }
 
     @Override
@@ -42,12 +44,12 @@ public class SingularMessageChannel<T> implements Channel<T> {
 
     @Override
     public boolean hasAvailableMessages() {
-        return !queue.isEmpty();
+        return message != null;
     }
 
     @Override
     public int countOfAvailableMessages() {
-        return queue.size();
+        return message == null ? 0 : 1;
     }
 
 }
