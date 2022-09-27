@@ -7,12 +7,12 @@ import java.util.concurrent.TimeUnit;
 public class ParallelQueue<T> extends LinkedQueue<T> {
 
     private boolean isSubscriberStarted;
-    private BlockingQueue<T> queue;
+    private final BlockingQueue<T> queue;
 
     public ParallelQueue() {
         isSubscriberStarted = false;
 
-        queue = new ArrayBlockingQueue<T>(1024);
+        queue = new ArrayBlockingQueue<>(1024);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class ParallelQueue<T> extends LinkedQueue<T> {
     }
 
     public void startSubscriber() {
-        ((ParallelizedStep) this.getSubscriber()).startPolling();
+        this.getSubscriber().startPolling();
     }
 
 }
