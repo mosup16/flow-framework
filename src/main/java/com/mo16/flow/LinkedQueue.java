@@ -8,10 +8,10 @@ import java.util.List;
 public class LinkedQueue<T> implements Queue<T> {
 
     private final Deque<T> queue;
-    private QueueSubscriber subscriber;
+    private QueueSubscriber<T> subscriber;
 
     public LinkedQueue() {
-        queue = new LinkedList<T>();
+        queue = new LinkedList<>();
     }
 
 
