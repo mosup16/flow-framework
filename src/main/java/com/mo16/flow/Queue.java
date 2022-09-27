@@ -1,13 +1,10 @@
 package com.mo16.flow;
 
-import java.util.List;
 
 public interface Queue<T> {
     void push(T msg);
 
     T poll();
-
-    List<T> pollChunk(int cSize);
 
     void notifySubscriber();
 
