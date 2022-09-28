@@ -3,7 +3,7 @@ package com.mo16.flow;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoundRobinParallelTransporter<T> implements Transporter<T> {
+public class MultiChannelTransporter<T> implements Transporter<T> {
     private List<Channel<T>> channels = new ArrayList<>();
     private int nextQueue = 0;
 

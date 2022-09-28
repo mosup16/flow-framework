@@ -59,7 +59,7 @@ public class Flow<T> {
         List<Channel<T>> newPipelineLastChannels = new LinkedList<>();
         for (Channel<T> channel : this.pipelineLastChannels) {
             // create round-robin transporter
-            var transporter = new RoundRobinParallelTransporter<T>();
+            var transporter = new MultiChannelTransporter<T>();
             for (int i = 0; i < numOfThreads; i++)
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
