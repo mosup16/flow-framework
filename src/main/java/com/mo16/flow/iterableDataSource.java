@@ -30,6 +30,7 @@ public class iterableDataSource<O> implements DataSource<O> {
 
 
     private void complete() {
+        transporter.closeChannel();
         setCompleted();
     }
 

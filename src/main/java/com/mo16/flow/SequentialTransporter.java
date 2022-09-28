@@ -22,4 +22,9 @@ public class SequentialTransporter<T> implements Transporter<T> {
     public void publishMessage(T msg) {
         channel.push(msg);
     }
+
+    @Override
+    public void closeChannel() {
+        channel.close();
+    }
 }

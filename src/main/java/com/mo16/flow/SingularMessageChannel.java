@@ -10,6 +10,7 @@ public class SingularMessageChannel<T> implements Channel<T> {
 
     private T message;
     private ChannelSubscriber<T> subscriber;
+    private boolean closed;
 
     public SingularMessageChannel() {
     }
@@ -50,6 +51,17 @@ public class SingularMessageChannel<T> implements Channel<T> {
     @Override
     public int countOfAvailableMessages() {
         return message == null ? 0 : 1;
+    }
+
+    @Override
+    public void close() {
+        subscriber.channelClosed();
+        closed = true;
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
 }

@@ -25,4 +25,9 @@ public class RoundRobinParallelTransporter<T> implements Transporter<T> {
 
     }
 
+    @Override
+    public void closeChannel() {
+        channels.forEach(Channel::close);
+    }
+
 }

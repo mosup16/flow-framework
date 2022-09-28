@@ -1,7 +1,7 @@
 package com.mo16.flow;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
@@ -12,7 +12,7 @@ public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
     public BufferedBlockingChannel() {
         isSubscriberStarted = false;
 
-        queue = new ArrayBlockingQueue<>(1024);
+        queue = new LinkedBlockingDeque<>(1024);
     }
 
     @Override

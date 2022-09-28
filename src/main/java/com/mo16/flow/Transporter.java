@@ -6,5 +6,5 @@ public interface Transporter<T> {
     void addChannel(Channel<T> channel);
     List<Channel<T>> getChannels();
     void publishMessage(T msg);
-
+    void closeChannel();
 }

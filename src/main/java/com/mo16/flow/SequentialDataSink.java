@@ -6,6 +6,7 @@ public class SequentialDataSink<I> implements DataSink<I> {
     private Channel<I> channel;
     private Consumer<I> consumer;
 
+
     @Override
     public void setQueue(Channel<I> channel) {
         this.channel = channel;
@@ -36,6 +37,11 @@ public class SequentialDataSink<I> implements DataSink<I> {
     @Override
     public I pollMessage() {
         return this.getQueue().poll();
+    }
+
+    @Override
+    public void channelClosed() {
+        return;
     }
 
 

@@ -8,4 +8,6 @@ public interface ChannelSubscriber<I> {
     void startPolling();
 
     I pollMessage();
+
+    void channelClosed();
 }

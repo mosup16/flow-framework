@@ -7,10 +7,16 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
     private final ExecutorService executorService;
     private final DataSource source;
     private Consumer<T, T> consumer;
+    private boolean channelClosed;
 
     public ParallelizedStep(ExecutorService executorService, DataSource source) {
         this.executorService = executorService;
         this.source = source;
+    }
+
+    @Override
+    public void channelClosed() {
+        channelClosed = true;
     }
 
     @Override
@@ -36,13 +42,13 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
     static class Consumer<I, O> implements Runnable {
 
         private boolean isDone = false;
-        private final BufferedBlockingChannel<I> queue;
+        private final BufferedBlockingChannel<I> channel;
         private final Function<I, O> messageHandler;
         private final Transporter<O> transporter;
 
-        public Consumer(BufferedBlockingChannel<I> queue, Transporter<O> transporter,
+        public Consumer(BufferedBlockingChannel<I> channel, Transporter<O> transporter,
                         Function<I, O> messageHandler) {
-            this.queue = queue;
+            this.channel = channel;
             this.messageHandler = messageHandler;
             this.transporter = transporter;
         }
@@ -50,13 +56,17 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
         @Override
         public void run() {
             while (!isDone) {
-                    I input = queue.poll();
+                    I input = channel.poll();
+                    if (input == null && channel.isClosed()){
+                        transporter.closeChannel();
+                        break;
+                    }
                     O output = messageHandler.apply(input);
                     transporter.publishMessage(output);
             }
-            while (queue.hasAvailableMessages()) { //clean the queue
+            while (channel.hasAvailableMessages()) { //clean the queue
                 System.out.println("hhhhh");
-                I input = queue.poll();
+                I input = channel.poll();
                 O output = messageHandler.apply(input);
                 transporter.publishMessage(output);
             }

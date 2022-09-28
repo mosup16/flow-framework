@@ -45,6 +45,11 @@ public class SequentialStep<I, O> implements Step<I, O> {
     }
 
     @Override
+    public void channelClosed() {
+        transporter.closeChannel();
+    }
+
+    @Override
     public void setTransporter(Transporter<O> transporter) {
         this.transporter = transporter;
     }
