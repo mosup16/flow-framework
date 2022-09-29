@@ -8,18 +8,18 @@ public class SequentialDataSink<I> implements DataSink<I> {
 
 
     @Override
-    public void setQueue(Channel<I> channel) {
+    public void subscribeTo(Channel<I> channel) {
         this.channel = channel;
     }
 
     @Override
-    public Channel<I> getQueue() {
+    public Channel<I> getSourceChannel() {
         return this.channel;
     }
 
     @Override
     public void startPolling() {
-        int numberOfMessages = getQueue().countOfAvailableMessages();
+        int numberOfMessages = getSourceChannel().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++)
             consume(pollMessage());
     }
@@ -36,7 +36,7 @@ public class SequentialDataSink<I> implements DataSink<I> {
 
     @Override
     public I pollMessage() {
-        return this.getQueue().poll();
+        return this.getSourceChannel().poll();
     }
 
     @Override

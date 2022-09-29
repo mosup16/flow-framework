@@ -24,7 +24,7 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
         ParallelizedStep<T> step = new ParallelizedStep<>(this.executorService, this.source);
         step.onNewMessage(this.getMessageHandler());
 
-        step.setQueue(this.getQueue());
+        step.subscribeTo(this.getSourceChannel());
         step.setTransporter(this.getTransporter());
         return step;
     }
@@ -33,7 +33,7 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
 
     @Override
     public void startPolling() {
-        consumer = new Consumer<>((BufferedBlockingChannel<T>) getQueue(),
+        consumer = new Consumer<>((BufferedBlockingChannel<T>) getSourceChannel(),
                 getTransporter(), getMessageHandler());
 
         executorService.submit(consumer);

@@ -13,18 +13,18 @@ public class SequentialStep<I, O> implements Step<I, O> {
     }
 
     @Override
-    public void setQueue(Channel<I> channel) {
+    public void subscribeTo(Channel<I> channel) {
         this.channel = channel;
     }
 
     @Override
-    public Channel<I> getQueue() {
+    public Channel<I> getSourceChannel() {
         return this.channel;
     }
 
     @Override
     public void startPolling() {
-        int numberOfMessages = getQueue().countOfAvailableMessages();
+        int numberOfMessages = getSourceChannel().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
             if (channel.hasAvailableMessages()) {
                 O output = function.apply(pollMessage());
@@ -41,7 +41,7 @@ public class SequentialStep<I, O> implements Step<I, O> {
 
     @Override
     public I pollMessage() {
-        return this.getQueue().poll();
+        return this.getSourceChannel().poll();
     }
 
     @Override

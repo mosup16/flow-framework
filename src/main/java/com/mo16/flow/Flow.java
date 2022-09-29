@@ -66,7 +66,7 @@ public class Flow<T> {
 
             Step<T, T> s = new SequentialStep<>();
             s.onNewMessage(t -> t);
-            s.setQueue(channel);
+            s.subscribeTo(channel);
             channel.setSubscriber(s);
             s.setTransporter(transporter);
         }
@@ -96,7 +96,7 @@ public class Flow<T> {
         for (Channel channelTobeSubscribedTo : pipelineLastChannels) {
             Step<T, O> step = stepTobeChained.copy();
             step.onNewMessage(stepTobeChained.getMessageHandler());
-            step.setQueue(channelTobeSubscribedTo);
+            step.subscribeTo(channelTobeSubscribedTo);
             channelTobeSubscribedTo.setSubscriber(step);
 
             Transporter<O> transporter = new SequentialTransporter<>();
@@ -119,7 +119,7 @@ public class Flow<T> {
         for (Channel channel : this.pipelineLastChannels) {
             SequentialDataSink<T> sink = new SequentialDataSink<>();
             channel.setSubscriber(sink);
-            sink.setQueue(channel);
+            sink.subscribeTo(channel);
             sink.onNewMessage(consumer);
         }
         source.generate();

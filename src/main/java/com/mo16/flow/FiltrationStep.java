@@ -12,9 +12,9 @@ public class FiltrationStep<I> extends SequentialStep<I, I> {
 
     @Override
     public void startPolling() {
-        int numberOfMessages = getQueue().countOfAvailableMessages();
+        int numberOfMessages = getSourceChannel().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
-            if (super.getQueue().hasAvailableMessages()) {
+            if (super.getSourceChannel().hasAvailableMessages()) {
                 I msg = pollMessage();
                 if (filter.test(msg))
                     super.getTransporter().publishMessage(msg);
@@ -27,7 +27,7 @@ public class FiltrationStep<I> extends SequentialStep<I, I> {
         FiltrationStep<I> step = new FiltrationStep<>();
         step.setFilter(filter);
         step.onNewMessage(super.getMessageHandler());
-        step.setQueue(super.getQueue());
+        step.subscribeTo(super.getSourceChannel());
         step.setTransporter(super.getTransporter());
         return step;
     }

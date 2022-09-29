@@ -1,9 +1,9 @@
 package com.mo16.flow;
 
 public interface ChannelSubscriber<I> {
-    void setQueue(Channel<I> channel);
+    void subscribeTo(Channel<I> channel);
 
-    Channel<I> getQueue();
+    Channel<I> getSourceChannel();
 
     void startPolling();
 
