@@ -56,8 +56,8 @@ public class SingularMessageChannel<T> implements Channel<T> {
 
     @Override
     public void close() {
-        subscriber.channelClosed();
         closed = true;
+        subscriber.channelClosed();
     }
 
     @Override
