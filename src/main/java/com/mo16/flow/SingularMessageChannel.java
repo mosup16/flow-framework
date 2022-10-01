@@ -24,8 +24,9 @@ public class SingularMessageChannel<T> implements Channel<T> {
 
     @Override
     public T poll() {
-        //TODO should handle thrown exception if the data structure is empty properly
-        return message;
+        T msg = message;
+        message = null;
+        return msg;
     }
 
     @Override
