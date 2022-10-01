@@ -43,4 +43,14 @@ class SingularMessageChannelTest {
         assertFalse(channel.hasAvailableMessages());
         assertNull(channel.poll()); // message should be removed after being polled
     }
+
+    @Test
+    @DisplayName("test notify subscriber")
+    void notifySubscriber() {
+        SingularMessageChannel<Integer> channel = new SingularMessageChannel<>();
+        ChannelSubscriber<Integer> subscriber = mock(ChannelSubscriber.class);
+        channel.setSubscriber(subscriber);
+        channel.notifySubscriber();
+        verify(subscriber, times(1)).startPolling();
+    }
 }
