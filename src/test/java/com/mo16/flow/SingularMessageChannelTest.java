@@ -53,4 +53,18 @@ class SingularMessageChannelTest {
         channel.notifySubscriber();
         verify(subscriber, times(1)).startPolling();
     }
+
+    @Test
+    @DisplayName("test hasAvailableMessages()")
+    void hasAvailableMessages() {
+        SingularMessageChannel<Integer> channel = new SingularMessageChannel<>();
+        channel.setSubscriber(mock(ChannelSubscriber.class));
+        assertFalse(channel.hasAvailableMessages());
+
+        channel.push(1);
+        assertTrue(channel.hasAvailableMessages());
+
+        channel.poll();
+        assertFalse(channel.hasAvailableMessages());
+    }
 }
