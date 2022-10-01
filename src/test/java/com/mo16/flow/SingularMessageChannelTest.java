@@ -26,4 +26,21 @@ class SingularMessageChannelTest {
         verify(step, times(1)).startPolling();
     }
 
+    @Test
+    @DisplayName("test message polling from a singular channel")
+    void poll() {
+        SingularMessageChannel<Integer> channel = new SingularMessageChannel<>();
+        channel.setSubscriber(mock(ChannelSubscriber.class));
+
+        channel.push(1);
+        assertEquals(1, channel.countOfAvailableMessages());
+        assertTrue(channel.hasAvailableMessages());
+
+        Integer polledMsg = channel.poll();
+        assertEquals(1, polledMsg);
+
+        assertEquals(0, channel.countOfAvailableMessages());
+        assertFalse(channel.hasAvailableMessages());
+        assertNull(channel.poll()); // message should be removed after being polled
+    }
 }
