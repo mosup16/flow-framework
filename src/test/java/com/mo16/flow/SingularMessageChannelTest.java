@@ -19,11 +19,11 @@ class SingularMessageChannelTest {
     @DisplayName("test message push to a singular channel")
     void push() {
         SingularMessageChannel<Integer> channel = new SingularMessageChannel<>();
-        SequentialStep<Integer,Integer> step = mock(new SequentialStep<Integer, Integer>(){}.getClass());
-        channel.setSubscriber(step);
+        ChannelSubscriber<Integer> subscriber = mock(ChannelSubscriber.class);
+        channel.setSubscriber(subscriber);
         channel.push(1);
         assertEquals(1, channel.poll());
-        verify(step, times(1)).startPolling();
+        verify(subscriber, times(1)).startPolling();
     }
 
     @Test
