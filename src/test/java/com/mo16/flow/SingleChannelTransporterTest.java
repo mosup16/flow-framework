@@ -17,4 +17,14 @@ class SingleChannelTransporterTest {
         verify(channel, times(1)).push(1);
     }
 
+    @Test
+    @DisplayName("test channel closing via SingleChannelTransporter")
+    void closeChannel() {
+        var transporter = new SingleChannelTransporter<Integer>();
+        Channel<Integer> channel = mock(Channel.class);
+        transporter.addChannel(channel);
+        transporter.closeChannel();
+        verify(channel).close();
+    }
+
 }
