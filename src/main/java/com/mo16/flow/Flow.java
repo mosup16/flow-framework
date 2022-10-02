@@ -27,7 +27,7 @@ public class Flow<T> {
 
         DataSource<O> source = DataSource.newIterableDataSource(iterable);
 
-        Transporter<O> transporter = new SequentialTransporter<>();
+        Transporter<O> transporter = new SingleChannelTransporter<>();
         source.setTransporter(transporter);
 
         Channel<O> dataSourceChannel = new SingularMessageChannel<>();
@@ -99,7 +99,7 @@ public class Flow<T> {
             step.subscribeTo(channelTobeSubscribedTo);
             channelTobeSubscribedTo.setSubscriber(step);
 
-            Transporter<O> transporter = new SequentialTransporter<>();
+            Transporter<O> transporter = new SingleChannelTransporter<>();
             SingularMessageChannel<O> queue = new SingularMessageChannel<>();
             transporter.addChannel(queue);
             step.setTransporter(transporter);

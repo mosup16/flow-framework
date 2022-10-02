@@ -2,10 +2,10 @@ package com.mo16.flow;
 
 import java.util.List;
 
-public class SequentialTransporter<T> implements Transporter<T> {
+public class SingleChannelTransporter<T> implements Transporter<T> {
     private Channel<T> channel;
 
-    public SequentialTransporter(){
+    public SingleChannelTransporter(){
     }
 
     @Override
