@@ -1,5 +1,6 @@
 package com.mo16.flow;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,17 +12,25 @@ import static org.mockito.Mockito.*;
 
 class SequentialStepTest {
 
+    private SequentialStep<Integer, Integer> step;
+    private Transporter<Integer> transporter;
+    private Channel<Integer> channel;
+    private Function<Integer, Integer> handler;
+
+    @BeforeEach
+    void setUp() {
+        step = new SequentialStep<>();
+        transporter = mock(Transporter.class);
+        step.setTransporter(transporter);
+        channel = mock(Channel.class);
+        step.subscribeTo(channel);
+        handler = mock(Function.class);
+        step.onNewMessage(handler);
+    }
+
     @Test
     @DisplayName("test startPolling() on sequential step")
     void startPolling() {
-        var step = new SequentialStep<Integer, Integer>();
-        Transporter<Integer> transporter = mock(Transporter.class);
-        step.setTransporter(transporter);
-        Channel<Integer> channel = mock(Channel.class);
-        step.subscribeTo(channel);
-        Function<Integer, Integer> handler = mock(Function.class);
-        step.onNewMessage(handler);
-
         when(channel.countOfAvailableMessages()).thenReturn(1);
         when(channel.hasAvailableMessages()).thenReturn(true);
         when(channel.poll()).thenReturn(1);
