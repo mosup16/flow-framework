@@ -46,7 +46,11 @@ class SequentialStepTest {
     }
 
     @Test
+    @DisplayName("test SequentialStep pollMessage()")
     void pollMessage() {
+        when(channel.poll()).thenReturn(2);
+        assertEquals(2 ,step.pollMessage());
+        verify(channel, times(1)).poll();
     }
 
     @Test
