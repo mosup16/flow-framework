@@ -3,7 +3,6 @@ package com.mo16.flow;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.function.Function;
 
@@ -54,7 +53,10 @@ class SequentialStepTest {
     }
 
     @Test
+    @DisplayName("test channelClosed()")
     void channelClosed() {
+        step.channelClosed();
+        verify(transporter, times(1)).closeChannel();
     }
 
     @Test
