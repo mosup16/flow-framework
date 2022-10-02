@@ -81,4 +81,23 @@ class SingularMessageChannelTest {
         channel.poll();
         assertEquals(0,channel.countOfAvailableMessages());
     }
+
+    @Test
+    @DisplayName("test singular channel closing")
+    void close(){
+        var channel = new SingularMessageChannel<Integer>();
+        ChannelSubscriber<Integer> subscriber = mock(ChannelSubscriber.class);
+        channel.setSubscriber(subscriber);
+
+        assertFalse(channel.isClosed());
+        channel.close();
+        assertTrue(channel.isClosed());
+
+        channel.close();
+        assertTrue(channel.isClosed());
+
+        // must be invoked only once regardless of how many times close() was invoked
+        verify(subscriber, times(1)).channelClosed();
+
+    }
 }
