@@ -60,6 +60,11 @@ class SequentialStepTest {
     }
 
     @Test
+    @DisplayName("test copy()")
     void copy() {
+        Step<Integer, Integer> copiedStep = step.copy();
+        assertEquals(handler, copiedStep.getMessageHandler());
+        assertEquals(channel, copiedStep.getSourceChannel());
+        assertEquals(transporter, copiedStep.getTransporter());
     }
 }
