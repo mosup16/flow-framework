@@ -46,7 +46,7 @@ public class Flow<T> {
     public <O> Flow<O> map(Function<T, O> function) {
         ProcessingStep<T, O> step = new SynchronousStep<>();
         step.setMessageProcessor(function);
-        return chainSequentialStep(step, this.pipelineLastChannels, this);
+        return chainStep(step, this.pipelineLastChannels, this);
     }
 
     public boolean isParallel() {
@@ -74,7 +74,7 @@ public class Flow<T> {
         executorService = Executors.newFixedThreadPool(numOfThreads);
         ProcessingStep<T, T> parallelStep = new AsynchronousStep<T>(executorService);
         parallelStep.setMessageProcessor(t -> t);
-        Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastChannels, this)
+        Flow<O> flow = chainStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);
         flow.isParallel = true;
         return flow;
@@ -86,11 +86,11 @@ public class Flow<T> {
         step.setFilter(predicate);
         step.setMessageProcessor(t -> t);
 
-        return chainSequentialStep(step, this.pipelineLastChannels, this);
+        return chainStep(step, this.pipelineLastChannels, this);
     }
 
-    private <O> Flow<O> chainSequentialStep(Step<T, O> stepTobeChained,
-                                            List<Channel<T>> pipelineLastChannels, Flow<T> sourceFlow) {
+    private <O> Flow<O> chainStep(Step<T, O> stepTobeChained,
+                                  List<Channel<T>> pipelineLastChannels, Flow<T> sourceFlow) {
         Flow<O> flow = new Flow<>();
         LinkedList<Channel<O>> newPipelineLastChannels = new LinkedList<>();
         for (Channel channelTobeSubscribedTo : pipelineLastChannels) {
