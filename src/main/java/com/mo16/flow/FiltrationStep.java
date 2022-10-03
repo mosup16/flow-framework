@@ -2,22 +2,56 @@ package com.mo16.flow;
 
 import java.util.function.Predicate;
 
-public class FiltrationStep<I> extends SynchronousStep<I, I> {
+public class FiltrationStep<I> implements Step<I, I> {
 
     private Predicate<I> filter;
+    private Channel<I> channel;
+    private Transporter<I> transporter;
 
     public void setFilter(Predicate<I> predicate){
         this.filter = predicate;
     }
 
     @Override
+    public void subscribeTo(Channel<I> channel) {
+        this.channel = channel;
+    }
+
+    @Override
+    public Channel<I> getSourceChannel() {
+        return this.channel;
+    }
+
+
+    @Override
+    public I pollMessage() {
+        return this.getSourceChannel().poll();
+    }
+
+    @Override
+    public void channelClosed() {
+        transporter.closeChannel();
+    }
+
+    @Override
+    public void setTransporter(Transporter<I> transporter) {
+        this.transporter = transporter;
+    }
+
+    @Override
+    public Transporter<I> getTransporter() {
+        return this.transporter;
+    }
+
+
+    @Override
     public void startPolling() {
         int numberOfMessages = getSourceChannel().countOfAvailableMessages();
         for (int i = 0; i < numberOfMessages; i++) {
-            if (super.getSourceChannel().hasAvailableMessages()) {
+            if (this.getSourceChannel().hasAvailableMessages()) {
                 I msg = pollMessage();
                 if (filter.test(msg))
-                    super.getTransporter().publishMessage(msg);
+                    this.getTransporter().publishMessage(msg);
             } else break;
         }
     }
@@ -26,9 +60,8 @@ public class FiltrationStep<I> extends SynchronousStep<I, I> {
     public FiltrationStep<I> copy() {
         FiltrationStep<I> step = new FiltrationStep<>();
         step.setFilter(filter);
-        step.setMessageProcessor(super.getMessageProcessor());
-        step.subscribeTo(super.getSourceChannel());
-        step.setTransporter(super.getTransporter());
+        step.subscribeTo(this.getSourceChannel());
+        step.setTransporter(this.getTransporter());
         return step;
     }
 }

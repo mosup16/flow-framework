@@ -84,7 +84,6 @@ public class Flow<T> {
     public Flow<T> filter(Predicate<T> predicate) {
         FiltrationStep<T> step = new FiltrationStep<>();
         step.setFilter(predicate);
-        step.setMessageProcessor(t -> t);
 
         return chainStep(step, this.pipelineLastChannels, this);
     }
