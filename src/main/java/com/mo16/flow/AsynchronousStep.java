@@ -73,8 +73,7 @@ public class AsynchronousStep<T> implements Step<T, T> {
 
     @Override
     public void startPolling() {
-        consumer = new Consumer<>((BufferedBlockingChannel<T>) getSourceChannel(),
-                getTransporter(), getMessageHandler());
+        consumer = new Consumer<>(getSourceChannel(), getTransporter(), getMessageHandler());
 
         executorService.submit(consumer);
     }
@@ -82,11 +81,11 @@ public class AsynchronousStep<T> implements Step<T, T> {
     static class Consumer<I, O> implements Runnable {
 
         private boolean isDone = false;
-        private final BufferedBlockingChannel<I> channel;
+        private final Channel<I> channel;
         private final Function<I, O> messageHandler;
         private final Transporter<O> transporter;
 
-        public Consumer(BufferedBlockingChannel<I> channel, Transporter<O> transporter,
+        public Consumer(Channel<I> channel, Transporter<O> transporter,
                         Function<I, O> messageHandler) {
             this.channel = channel;
             this.messageHandler = messageHandler;
