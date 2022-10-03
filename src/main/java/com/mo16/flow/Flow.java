@@ -72,7 +72,7 @@ public class Flow<T> {
         }
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
-        Step<T, T> parallelStep = new ParallelizedStep<T>(executorService, this.source);
+        Step<T, T> parallelStep = new AsynchronousStep<T>(executorService, this.source);
         parallelStep.onNewMessage(t -> t);
         Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);

@@ -3,13 +3,13 @@ package com.mo16.flow;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-public class ParallelizedStep<T> extends SequentialStep<T, T> {
+public class AsynchronousStep<T> extends SequentialStep<T, T> {
     private final ExecutorService executorService;
     private final DataSource source;
     private Consumer<T, T> consumer;
     private boolean channelClosed;
 
-    public ParallelizedStep(ExecutorService executorService, DataSource source) {
+    public AsynchronousStep(ExecutorService executorService, DataSource source) {
         this.executorService = executorService;
         this.source = source;
     }
@@ -21,7 +21,7 @@ public class ParallelizedStep<T> extends SequentialStep<T, T> {
 
     @Override
     public Step<T, T> copy() {
-        ParallelizedStep<T> step = new ParallelizedStep<>(this.executorService, this.source);
+        AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService, this.source);
         step.onNewMessage(this.getMessageHandler());
 
         step.subscribeTo(this.getSourceChannel());
