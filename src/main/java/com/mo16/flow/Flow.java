@@ -44,7 +44,7 @@ public class Flow<T> {
     }
 
     public <O> Flow<O> map(Function<T, O> function) {
-        Step<T, O> step = new SequentialStep<>();
+        Step<T, O> step = new SynchronousStep<>();
         step.onNewMessage(function);
         return chainSequentialStep(step, this.pipelineLastChannels, this);
     }
@@ -64,7 +64,7 @@ public class Flow<T> {
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
 
-            Step<T, T> s = new SequentialStep<>();
+            Step<T, T> s = new SynchronousStep<>();
             s.onNewMessage(t -> t);
             s.subscribeTo(channel);
             channel.setSubscriber(s);

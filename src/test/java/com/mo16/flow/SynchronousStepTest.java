@@ -9,16 +9,16 @@ import java.util.function.Function;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class SequentialStepTest {
+class SynchronousStepTest {
 
-    private SequentialStep<Integer, Integer> step;
+    private SynchronousStep<Integer, Integer> step;
     private Transporter<Integer> transporter;
     private Channel<Integer> channel;
     private Function<Integer, Integer> handler;
 
     @BeforeEach
     void setUp() {
-        step = new SequentialStep<>();
+        step = new SynchronousStep<>();
         transporter = mock(Transporter.class);
         step.setTransporter(transporter);
         channel = mock(Channel.class);
@@ -28,7 +28,7 @@ class SequentialStepTest {
     }
 
     @Test
-    @DisplayName("test startPolling() on sequential step")
+    @DisplayName("test startPolling() on synchronous step")
     void startPolling() {
         when(channel.countOfAvailableMessages()).thenReturn(1);
         when(channel.hasAvailableMessages()).thenReturn(true);
@@ -45,7 +45,7 @@ class SequentialStepTest {
     }
 
     @Test
-    @DisplayName("test SequentialStep pollMessage()")
+    @DisplayName("test SynchronousStep pollMessage()")
     void pollMessage() {
         when(channel.poll()).thenReturn(2);
         assertEquals(2 ,step.pollMessage());

@@ -2,14 +2,16 @@ package com.mo16.flow;
 
 import java.util.function.Function;
 
-// a step designed to be executed in a sequential manner
-public class SequentialStep<I, O> implements Step<I, O> {
+/**
+ * this step is synchronous in the sense that it runs on the same thread which was created at.
+ */
+public class SynchronousStep<I, O> implements Step<I, O> {
 
     private Channel<I> channel;
     private Transporter<O> transporter;
     private Function<I, O> function;
 
-    public SequentialStep(){
+    public SynchronousStep(){
     }
 
     @Override
@@ -66,7 +68,7 @@ public class SequentialStep<I, O> implements Step<I, O> {
 
     @Override
     public Step<I, O> copy() {
-        SequentialStep<I, O> step = new SequentialStep<>();
+        SynchronousStep<I, O> step = new SynchronousStep<>();
         step.function = function;
         step.channel = channel;
         step.transporter = transporter;

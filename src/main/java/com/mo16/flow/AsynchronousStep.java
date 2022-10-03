@@ -3,7 +3,7 @@ package com.mo16.flow;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-public class AsynchronousStep<T> extends SequentialStep<T, T> {
+public class AsynchronousStep<T> extends SynchronousStep<T, T> {
     private final ExecutorService executorService;
     private final DataSource source;
     private Consumer<T, T> consumer;
