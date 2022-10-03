@@ -3,16 +3,56 @@ package com.mo16.flow;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-public class AsynchronousStep<T> extends SynchronousStep<T, T> {
+public class AsynchronousStep<T> implements Step<T, T> {
     private final ExecutorService executorService;
     private final DataSource source;
     private Consumer<T, T> consumer;
     private boolean channelClosed;
 
+    private Channel<T> channel;
+    private Function<T, T> messageHandler;
+    private Transporter<T> transporter;
+
     public AsynchronousStep(ExecutorService executorService, DataSource source) {
         this.executorService = executorService;
         this.source = source;
     }
+
+    @Override
+    public void subscribeTo(Channel<T> channel) {
+        this.channel = channel;
+    }
+
+    @Override
+    public Channel<T> getSourceChannel() {
+        return this.channel;
+    }
+
+    @Override
+    public T pollMessage() {
+        return this.getSourceChannel().poll();
+    }
+
+    @Override
+    public void onNewMessage(Function<T, T> messageHandler) {
+        this.messageHandler = messageHandler;
+    }
+
+    @Override
+    public Function<T, T> getMessageHandler() {
+        return this.messageHandler;
+    }
+
+    @Override
+    public void setTransporter(Transporter<T> transporter) {
+        this.transporter = transporter;
+    }
+
+    @Override
+    public Transporter<T> getTransporter() {
+        return this.transporter;
+    }
+
 
     @Override
     public void channelClosed() {
