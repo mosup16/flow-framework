@@ -12,6 +12,10 @@ public class FiltrationStep<I> implements Step<I, I> {
         this.filter = predicate;
     }
 
+    public Predicate<I> getFilter() {
+        return filter;
+    }
+
     @Override
     public void subscribeTo(Channel<I> channel) {
         this.channel = channel;
