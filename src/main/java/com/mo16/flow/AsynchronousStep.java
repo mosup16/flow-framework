@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 public class AsynchronousStep<T> implements Step<T, T> {
     private final ExecutorService executorService;
-    private final DataSource source;
     private Consumer<T, T> consumer;
     private boolean channelClosed;
 
@@ -13,9 +12,8 @@ public class AsynchronousStep<T> implements Step<T, T> {
     private Function<T, T> messageHandler;
     private Transporter<T> transporter;
 
-    public AsynchronousStep(ExecutorService executorService, DataSource source) {
+    public AsynchronousStep(ExecutorService executorService) {
         this.executorService = executorService;
-        this.source = source;
     }
 
     @Override
@@ -61,7 +59,7 @@ public class AsynchronousStep<T> implements Step<T, T> {
 
     @Override
     public Step<T, T> copy() {
-        AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService, this.source);
+        AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService);
         step.onNewMessage(this.getMessageHandler());
 
         step.subscribeTo(this.getSourceChannel());
