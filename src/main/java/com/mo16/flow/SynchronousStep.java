@@ -5,7 +5,7 @@ import java.util.function.Function;
 /**
  * this step is synchronous in the sense that it runs on the same thread which was created at.
  */
-public class SynchronousStep<I, O> implements Step<I, O> {
+public class SynchronousStep<I, O> implements ProcessingStep<I, O> {
 
     private Channel<I> channel;
     private Transporter<O> transporter;
@@ -62,12 +62,12 @@ public class SynchronousStep<I, O> implements Step<I, O> {
     }
 
     @Override
-    public Function<I, O> getMessageHandler() {
+    public Function<I, O> getMessageProcessor() {
         return this.function;
     }
 
     @Override
-    public Step<I, O> copy() {
+    public SynchronousStep<I, O> copy() {
         SynchronousStep<I, O> step = new SynchronousStep<>();
         step.function = function;
         step.channel = channel;

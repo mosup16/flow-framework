@@ -44,7 +44,7 @@ public class Flow<T> {
     }
 
     public <O> Flow<O> map(Function<T, O> function) {
-        Step<T, O> step = new SynchronousStep<>();
+        ProcessingStep<T, O> step = new SynchronousStep<>();
         step.onNewMessage(function);
         return chainSequentialStep(step, this.pipelineLastChannels, this);
     }
@@ -64,7 +64,7 @@ public class Flow<T> {
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
 
-            Step<T, T> s = new SynchronousStep<>();
+            ProcessingStep<T, T> s = new SynchronousStep<>();
             s.onNewMessage(t -> t);
             s.subscribeTo(channel);
             channel.setSubscriber(s);
@@ -72,7 +72,7 @@ public class Flow<T> {
         }
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
-        Step<T, T> parallelStep = new AsynchronousStep<T>(executorService);
+        ProcessingStep<T, T> parallelStep = new AsynchronousStep<T>(executorService);
         parallelStep.onNewMessage(t -> t);
         Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);
@@ -95,7 +95,6 @@ public class Flow<T> {
         LinkedList<Channel<O>> newPipelineLastChannels = new LinkedList<>();
         for (Channel channelTobeSubscribedTo : pipelineLastChannels) {
             Step<T, O> step = stepTobeChained.copy();
-            step.onNewMessage(stepTobeChained.getMessageHandler());
             step.subscribeTo(channelTobeSubscribedTo);
             channelTobeSubscribedTo.setSubscriber(step);
 

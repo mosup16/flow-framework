@@ -23,10 +23,10 @@ public class FiltrationStep<I> extends SynchronousStep<I, I> {
     }
 
     @Override
-    public Step<I, I> copy() {
+    public FiltrationStep<I> copy() {
         FiltrationStep<I> step = new FiltrationStep<>();
         step.setFilter(filter);
-        step.onNewMessage(super.getMessageHandler());
+        step.onNewMessage(super.getMessageProcessor());
         step.subscribeTo(super.getSourceChannel());
         step.setTransporter(super.getTransporter());
         return step;

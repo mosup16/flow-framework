@@ -3,7 +3,7 @@ package com.mo16.flow;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-public class AsynchronousStep<T> implements Step<T, T> {
+public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     private final ExecutorService executorService;
     private Consumer<T, T> consumer;
     private boolean channelClosed;
@@ -37,7 +37,7 @@ public class AsynchronousStep<T> implements Step<T, T> {
     }
 
     @Override
-    public Function<T, T> getMessageHandler() {
+    public Function<T, T> getMessageProcessor() {
         return this.messageHandler;
     }
 
@@ -60,7 +60,7 @@ public class AsynchronousStep<T> implements Step<T, T> {
     @Override
     public Step<T, T> copy() {
         AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService);
-        step.onNewMessage(this.getMessageHandler());
+        step.onNewMessage(this.getMessageProcessor());
 
         step.subscribeTo(this.getSourceChannel());
         step.setTransporter(this.getTransporter());
@@ -71,7 +71,7 @@ public class AsynchronousStep<T> implements Step<T, T> {
 
     @Override
     public void startPolling() {
-        consumer = new Consumer<>(getSourceChannel(), getTransporter(), getMessageHandler());
+        consumer = new Consumer<>(getSourceChannel(), getTransporter(), getMessageProcessor());
 
         executorService.submit(consumer);
     }

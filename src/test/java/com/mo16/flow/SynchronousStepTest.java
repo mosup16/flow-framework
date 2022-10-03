@@ -62,8 +62,8 @@ class SynchronousStepTest {
     @Test
     @DisplayName("test copy()")
     void copy() {
-        Step<Integer, Integer> copiedStep = step.copy();
-        assertEquals(handler, copiedStep.getMessageHandler());
+        SynchronousStep<Integer, Integer> copiedStep = step.copy();
+        assertEquals(handler, copiedStep.getMessageProcessor());
         assertEquals(channel, copiedStep.getSourceChannel());
         assertEquals(transporter, copiedStep.getTransporter());
     }
