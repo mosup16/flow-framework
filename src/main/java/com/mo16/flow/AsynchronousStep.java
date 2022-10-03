@@ -32,7 +32,7 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     }
 
     @Override
-    public void onNewMessage(Function<T, T> messageHandler) {
+    public void setMessageProcessor(Function<T, T> messageHandler) {
         this.messageHandler = messageHandler;
     }
 
@@ -60,7 +60,7 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     @Override
     public Step<T, T> copy() {
         AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService);
-        step.onNewMessage(this.getMessageProcessor());
+        step.setMessageProcessor(this.getMessageProcessor());
 
         step.subscribeTo(this.getSourceChannel());
         step.setTransporter(this.getTransporter());

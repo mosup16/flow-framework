@@ -24,7 +24,7 @@ class SynchronousStepTest {
         channel = mock(Channel.class);
         step.subscribeTo(channel);
         handler = mock(Function.class);
-        step.onNewMessage(handler);
+        step.setMessageProcessor(handler);
     }
 
     @Test

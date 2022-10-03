@@ -45,7 +45,7 @@ public class Flow<T> {
 
     public <O> Flow<O> map(Function<T, O> function) {
         ProcessingStep<T, O> step = new SynchronousStep<>();
-        step.onNewMessage(function);
+        step.setMessageProcessor(function);
         return chainSequentialStep(step, this.pipelineLastChannels, this);
     }
 
@@ -65,7 +65,7 @@ public class Flow<T> {
             newPipelineLastChannels.addAll(transporter.getChannels());
 
             ProcessingStep<T, T> s = new SynchronousStep<>();
-            s.onNewMessage(t -> t);
+            s.setMessageProcessor(t -> t);
             s.subscribeTo(channel);
             channel.setSubscriber(s);
             s.setTransporter(transporter);
@@ -73,7 +73,7 @@ public class Flow<T> {
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
         ProcessingStep<T, T> parallelStep = new AsynchronousStep<T>(executorService);
-        parallelStep.onNewMessage(t -> t);
+        parallelStep.setMessageProcessor(t -> t);
         Flow<O> flow = chainSequentialStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);
         flow.isParallel = true;
@@ -84,7 +84,7 @@ public class Flow<T> {
     public Flow<T> filter(Predicate<T> predicate) {
         FiltrationStep<T> step = new FiltrationStep<>();
         step.setFilter(predicate);
-        step.onNewMessage(t -> t);
+        step.setMessageProcessor(t -> t);
 
         return chainSequentialStep(step, this.pipelineLastChannels, this);
     }

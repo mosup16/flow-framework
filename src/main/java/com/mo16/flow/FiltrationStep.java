@@ -26,7 +26,7 @@ public class FiltrationStep<I> extends SynchronousStep<I, I> {
     public FiltrationStep<I> copy() {
         FiltrationStep<I> step = new FiltrationStep<>();
         step.setFilter(filter);
-        step.onNewMessage(super.getMessageProcessor());
+        step.setMessageProcessor(super.getMessageProcessor());
         step.subscribeTo(super.getSourceChannel());
         step.setTransporter(super.getTransporter());
         return step;

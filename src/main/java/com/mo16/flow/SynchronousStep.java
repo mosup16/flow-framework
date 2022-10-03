@@ -36,7 +36,7 @@ public class SynchronousStep<I, O> implements ProcessingStep<I, O> {
     }
 
     @Override
-    public void onNewMessage(Function<I, O> function) {
+    public void setMessageProcessor(Function<I, O> function) {
         this.function = function;
 
     }
