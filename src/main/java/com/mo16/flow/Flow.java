@@ -115,7 +115,7 @@ public class Flow<T> {
 
     public void forEach(Consumer<T> consumer) {
         for (Channel channel : this.pipelineLastChannels) {
-            SequentialDataSink<T> sink = new SequentialDataSink<>();
+            SynchronousDataSink<T> sink = new SynchronousDataSink<>();
             channel.setSubscriber(sink);
             sink.subscribeTo(channel);
             sink.onNewMessage(consumer);
