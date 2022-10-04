@@ -2,7 +2,7 @@ package com.mo16.flow;
 
 import java.util.function.Consumer;
 
-public class SequentialDataSink<I> implements DataSink<I> {
+public class SynchronousDataSink<I> implements DataSink<I> {
     private Channel<I> channel;
     private Consumer<I> consumer;
 
