@@ -18,13 +18,6 @@ public interface Channel<T> {
 
     void close();
 
-
-    static <I> SingularMessageChannel<I> createLinkedQueue(ChannelSubscriber<I> s) {
-        SingularMessageChannel<I> queue = new SingularMessageChannel<>();
-        queue.setSubscriber(s);
-        return queue;
-    }
-
     boolean isClosed();
 }
 
