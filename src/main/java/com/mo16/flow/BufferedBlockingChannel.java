@@ -4,10 +4,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.TimeUnit;
 
-public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
+public class BufferedBlockingChannel<T> implements Channel<T> {
 
     private boolean isSubscriberStarted;
     private final BlockingQueue<T> queue;
+    private ChannelSubscriber<T> subscriber;
+    private boolean closed;
+
 
     public BufferedBlockingChannel() {
         isSubscriberStarted = false;
@@ -46,8 +49,36 @@ public class BufferedBlockingChannel<T> extends SingularMessageChannel<T> {
     }
 
     @Override
+    public int countOfAvailableMessages() {
+        return queue.size();
+    }
+
+    @Override
+    public void notifySubscriber() {
+        subscriber.startPolling();
+    }
+
+    @Override
     public ChannelSubscriber<T> getSubscriber() {
-        return super.getSubscriber();
+        return subscriber;
+    }
+
+    @Override
+    public void setSubscriber(ChannelSubscriber<T> s) {
+        this.subscriber = s;
+    }
+
+    @Override
+    public void close() {
+        if (!closed) {
+            closed = true;
+            subscriber.channelClosed();
+        }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
     }
 
     public void startSubscriber() {
