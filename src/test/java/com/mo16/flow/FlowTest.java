@@ -4,7 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class FlowTest {
 
@@ -59,4 +65,25 @@ class FlowTest {
         for (int i = 0; i < res.size(); i++)
             assert (res.get(i).equals(expected.get(i)));
     }
+
+
+    @Test
+    @DisplayName("test parallel processing for data with parallelMap()")
+    void testParallelMao(){
+        var expectedSum = IntStream.range(0, 100000).map(i -> i + 1).filter(value -> value > 100).sum();
+        var threadsIds = new HashSet<Long>();
+        AtomicInteger sum = new AtomicInteger();
+        Flow.of(IntStream.range(0, 100000).boxed().collect(Collectors.toSet()))
+                .parallelMap(5, integer -> integer)
+                .map(integer -> integer + 1)
+                .filter(integer -> integer > 100)
+                .forEach(integer -> {
+                    threadsIds.add(Thread.currentThread().getId());
+                    sum.addAndGet(integer);
+                });
+        assertEquals(expectedSum, sum.get());
+        assertFalse(threadsIds.contains(Thread.currentThread().getId()));
+        assertEquals(5, threadsIds.size());
+    }
+
 }
