@@ -130,7 +130,6 @@ public class Flow<T> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("executorService.isTerminated() = " + executorService.isTerminated());
         }
 
 
