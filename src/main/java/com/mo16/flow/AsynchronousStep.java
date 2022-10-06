@@ -101,12 +101,6 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
                     O output = messageHandler.apply(input);
                     transporter.publishMessage(output);
             }
-            while (channel.hasAvailableMessages()) { //clean the queue
-                System.out.println("hhhhh");
-                I input = channel.poll();
-                O output = messageHandler.apply(input);
-                transporter.publishMessage(output);
-            }
 
         }
 
