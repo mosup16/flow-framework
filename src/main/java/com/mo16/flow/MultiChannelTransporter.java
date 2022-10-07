@@ -1,15 +1,21 @@
 package com.mo16.flow;
 
+import com.mo16.flow.loadbalancing.LoadBalancer;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MultiChannelTransporter<T> implements Transporter<T> {
+    private final LoadBalancer<T> loadBalancer;
     private List<Channel<T>> channels = new ArrayList<>();
-    private int nextQueue = 0;
+
+    public MultiChannelTransporter(LoadBalancer<T> loadBalancer){
+        this.loadBalancer = loadBalancer;
+    }
 
     @Override
     public void addChannel(Channel<T> channel) {
         this.channels.add(channel);
+        loadBalancer.registerChannel(channel);
     }
 
     @Override
@@ -19,10 +25,8 @@ public class MultiChannelTransporter<T> implements Transporter<T> {
 
     @Override
     public void publishMessage(T msg) {
-        nextQueue = nextQueue % this.channels.size();
-        channels.get(nextQueue).push(msg);
-        nextQueue++;
-
+        Channel<T> channel = loadBalancer.selectChannel();
+        channel.push(msg);
     }
 
     @Override
