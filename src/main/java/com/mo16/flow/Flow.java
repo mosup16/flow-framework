@@ -1,5 +1,9 @@
 package com.mo16.flow;
 
+import com.mo16.flow.loadbalancing.LoadBalancer;
+import com.mo16.flow.loadbalancing.LoadBalancerFactory;
+import com.mo16.flow.loadbalancing.LoadBalancingStrategy;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -53,13 +57,21 @@ public class Flow<T> {
         return this.isParallel;
     }
 
-    public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function) {
+    public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function){
+        return parallelMap(numOfThreads, LoadBalancingStrategy.ROUND_ROBIN, function);
+    }
+
+    public <O> Flow<O> parallelMap(int numOfThreads, LoadBalancingStrategy loadBalancingStrategy,
+                                   Function<T, O> function) {
         if (isParallel)
             return map(function);
+
+        var loadBalancerFactory = new LoadBalancerFactory<T>();
         List<Channel<T>> newPipelineLastChannels = new LinkedList<>();
+
         for (Channel<T> channel : this.pipelineLastChannels) {
-            // create round-robin transporter
-            var transporter = new MultiChannelTransporter<T>();
+            LoadBalancer<T> loadBalancer = loadBalancerFactory.getInstanceFor(loadBalancingStrategy);
+            var transporter = new MultiChannelTransporter<T>(loadBalancer);
             for (int i = 0; i < numOfThreads; i++)
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
