@@ -96,7 +96,6 @@ class FlowTest {
         var expectedSum = IntStream.range(0, 100000).map(i -> i + 1).filter(value -> value > 100).sum();
         var messagesPerThread = new Hashtable<Long, Integer>();
         AtomicInteger sum = new AtomicInteger();
-        long start = System.currentTimeMillis();
         Flow.of(IntStream.range(0, 100000).boxed().collect(Collectors.toSet()))
                 .parallelMap(5, LoadBalancingStrategy.ROUND_ROBIN , integer -> integer)
                 .map(integer -> integer + 1)
@@ -109,7 +108,6 @@ class FlowTest {
                     lock.unlock();
                     sum.addAndGet(integer);
                 });
-        System.out.println("time taken " + (System.currentTimeMillis() - start));
         assertEquals(expectedSum, sum.get());
         assertFalse(messagesPerThread.contains(Thread.currentThread().getId()));
         assertEquals(5, messagesPerThread.size());
