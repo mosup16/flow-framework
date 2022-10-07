@@ -57,7 +57,12 @@ public class Flow<T> {
         return this.isParallel;
     }
 
-    public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function) {
+    public <O> Flow<O> parallelMap(int numOfThreads, Function<T, O> function){
+        return parallelMap(numOfThreads, LoadBalancingStrategy.ROUND_ROBIN, function);
+    }
+
+    public <O> Flow<O> parallelMap(int numOfThreads, LoadBalancingStrategy loadBalancingStrategy,
+                                   Function<T, O> function) {
         if (isParallel)
             return map(function);
 
@@ -65,7 +70,7 @@ public class Flow<T> {
         List<Channel<T>> newPipelineLastChannels = new LinkedList<>();
 
         for (Channel<T> channel : this.pipelineLastChannels) {
-            LoadBalancer<T> loadBalancer = loadBalancerFactory.getInstanceFor(LoadBalancingStrategy.ROUND_ROBIN);
+            LoadBalancer<T> loadBalancer = loadBalancerFactory.getInstanceFor(loadBalancingStrategy);
             var transporter = new MultiChannelTransporter<T>(loadBalancer);
             for (int i = 0; i < numOfThreads; i++)
                 transporter.addChannel(new BufferedBlockingChannel<>());
