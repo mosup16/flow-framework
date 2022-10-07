@@ -30,7 +30,7 @@ public class MultiChannelTransporter<T> implements Transporter<T> {
     }
 
     @Override
-    public void closeChannel() {
+    public void closeChannel() { //TODO rename method
         channels.forEach(Channel::close);
     }
 
