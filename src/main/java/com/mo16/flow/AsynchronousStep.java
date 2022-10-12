@@ -7,6 +7,7 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     private final ExecutorService executorService;
     private Consumer<T, T> consumer;
     private boolean channelClosed;
+    private boolean started;
 
     private Channel<T> channel;
     private Function<T, T> messageHandler;
@@ -56,7 +57,6 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     public void channelClosed() {
         channelClosed = true;
     }
-
     @Override
     public Step<T, T> copy() {
         AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService);
@@ -71,9 +71,11 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
 
     @Override
     public void startPolling() {
+        if (started) return;
         consumer = new Consumer<>(getSourceChannel(), getTransporter(), getMessageProcessor());
 
         executorService.submit(consumer);
+        started = true;
     }
 
     static class Consumer<I, O> implements Runnable {

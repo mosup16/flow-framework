@@ -6,14 +6,12 @@ import java.util.concurrent.TimeUnit;
 
 public class BufferedBlockingChannel<T> implements Channel<T> {
 
-    private boolean isSubscriberStarted;
     private final BlockingQueue<T> queue;
     private ChannelSubscriber<T> subscriber;
     private boolean closed;
 
 
     public BufferedBlockingChannel() {
-        isSubscriberStarted = false;
 
         queue = new LinkedBlockingDeque<>(1024);
     }
@@ -25,10 +23,7 @@ public class BufferedBlockingChannel<T> implements Channel<T> {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (!this.isSubscriberStarted) {
             startSubscriber();
-            this.isSubscriberStarted = true;
-        }
     }
 
     @Override
