@@ -4,10 +4,7 @@ import com.mo16.flow.loadbalancing.LoadBalancingStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -143,4 +140,104 @@ class FlowTest {
         assertNotEquals(1, messagesPerThread.values().stream().distinct().count());
     }
 
+
+    @Test
+    @DisplayName("test back pressure with limited channel and flow size")
+    void testBackPressureWithLimitedChannelAndFlowSize(){
+        var expectedSum = IntStream.range(0, 10000).map(i -> i + 1).filter(value -> value > 100).sum();
+        var threadsIds = new HashSet<Long>();
+        AtomicInteger sum = new AtomicInteger();
+        Set<Integer> input = IntStream.range(0, 10000).boxed().collect(Collectors.toSet());
+        Flow.of(input, new BackPressureConfigs(600, 5000))
+                .parallelMap(10, integer -> integer)
+                .map(integer -> integer + 1)
+                .filter(integer -> integer > 100)
+                .forEach(integer -> {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    threadsIds.add(Thread.currentThread().getId());
+                    sum.addAndGet(integer);
+                });
+        assertEquals(expectedSum, sum.get());
+        assertFalse(threadsIds.contains(Thread.currentThread().getId()));
+        assertEquals(10, threadsIds.size());
+    }
+
+    @Test
+    @DisplayName("test back pressure with unlimited channel and limited flow size")
+    void testBackPressureWithUnlimitedChannelAndLimitedFlowSize(){
+        var expectedSum = IntStream.range(0, 10000).map(i -> i + 1).filter(value -> value > 100).sum();
+        var threadsIds = new HashSet<Long>();
+        AtomicInteger sum = new AtomicInteger();
+        Set<Integer> input = IntStream.range(0, 10000).boxed().collect(Collectors.toSet());
+        Flow.of(input, new BackPressureConfigs(-1, 5000))
+                .parallelMap(10, integer -> integer)
+                .map(integer -> integer + 1)
+                .filter(integer -> integer > 100)
+                .forEach(integer -> {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    threadsIds.add(Thread.currentThread().getId());
+                    sum.addAndGet(integer);
+                });
+        assertEquals(expectedSum, sum.get());
+        assertFalse(threadsIds.contains(Thread.currentThread().getId()));
+        assertEquals(10, threadsIds.size());
+    }
+
+    @Test
+    @DisplayName("test back pressure with limited channel and unlimited flow size")
+    void testBackPressureWithLimitedChannelAndUnlimitedFlowSize(){
+        var expectedSum = IntStream.range(0, 10000).map(i -> i + 1).filter(value -> value > 100).sum();
+        var threadsIds = new HashSet<Long>();
+        AtomicInteger sum = new AtomicInteger();
+        Set<Integer> input = IntStream.range(0, 10000).boxed().collect(Collectors.toSet());
+        Flow.of(input, new BackPressureConfigs(600, -1))
+                .parallelMap(10, integer -> integer)
+                .map(integer -> integer + 1)
+                .filter(integer -> integer > 100)
+                .forEach(integer -> {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    threadsIds.add(Thread.currentThread().getId());
+                    sum.addAndGet(integer);
+                });
+        assertEquals(expectedSum, sum.get());
+        assertFalse(threadsIds.contains(Thread.currentThread().getId()));
+        assertEquals(10, threadsIds.size());
+    }
+
+    @Test
+    @DisplayName("test back pressure with least buffer size Load Balancing")
+    void testBackPressureWithLeastBufferSizeLoadBalancing(){
+        var expectedSum = IntStream.range(0, 10000).map(i -> i + 1).filter(value -> value > 100).sum();
+        var threadsIds = new HashSet<Long>();
+        AtomicInteger sum = new AtomicInteger();
+        Set<Integer> input = IntStream.range(0, 10000).boxed().collect(Collectors.toSet());
+        Flow.of(input, new BackPressureConfigs(600, 5000))
+                .parallelMap(10, LoadBalancingStrategy.LEAST_BUFFER_SIZE, integer -> integer)
+                .map(integer -> integer + 1)
+                .filter(integer -> integer > 100)
+                .forEach(integer -> {
+                    try {
+                        Thread.sleep(5);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    threadsIds.add(Thread.currentThread().getId());
+                    sum.addAndGet(integer);
+                });
+        assertEquals(expectedSum, sum.get());
+        assertFalse(threadsIds.contains(Thread.currentThread().getId()));
+        assertEquals(10, threadsIds.size());
+    }
 }
