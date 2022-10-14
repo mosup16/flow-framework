@@ -7,21 +7,27 @@ import java.util.*;
 public class LeastBufferSizeLoadBalancer<T> implements LoadBalancer<T>{
 
     Set<Channel<T>> channels = new HashSet<>();
+    Map<Channel<T>, Boolean> channelsActivationStates = new HashMap<>();
 
     public void registerChannel(Channel<T> channel){
         channels.add(channel);
+        channelsActivationStates.put(channel, true);
     }
 
     public Channel<T> selectChannel(){
-        return channels.stream().min(Comparator.comparingInt(Channel::countOfAvailableMessages))
-                .orElseThrow(() -> new RuntimeException("no channel could be selected"));
+        return channels.stream()
+                .filter(channel -> channelsActivationStates.get(channel))
+                .min(Comparator.comparingInt(Channel::countOfAvailableMessages))
+                .orElseThrow(() -> new RuntimeException("channel couldn't be selected"));
     }
 
     @Override
-    public Channel<T> removeChannel(Channel<T> channel) throws IllegalArgumentException {
-        boolean removed = channels.remove(channel);
-        if (removed)
-            return channel;
-        else throw new IllegalArgumentException("provided channel can't be removed");
+    public void deactivateChannel(Channel<T> channel){
+        channelsActivationStates.put(channel, false);
+    }
+
+    @Override
+    public void activateChannel(Channel<T> channel){
+        channelsActivationStates.put(channel, true);
     }
 }
