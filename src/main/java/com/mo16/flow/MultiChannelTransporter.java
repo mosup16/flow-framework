@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MultiChannelTransporter<T> implements Transporter<T> {
     private final LoadBalancer<T> loadBalancer;
-    private List<Channel<T>> channels = new ArrayList<>();
+    private final List<Channel<T>> channels = new ArrayList<>();
 
     private final long channelMaxBufferSize;
     private final long flowMaxLoadLimit;
@@ -58,9 +58,13 @@ public class MultiChannelTransporter<T> implements Transporter<T> {
 
     @Override
     public boolean isOverloaded() {
-        return flowMaxLoadLimit > 0 && channels.stream()
+        return (flowMaxLoadLimit > 0 && channels.stream()
                 .mapToLong(Channel::countOfAvailableMessages)
-                .sum() >= flowMaxLoadLimit;
+                .sum() >= flowMaxLoadLimit)
+                || channels.stream()
+                        .allMatch(channel -> channelMaxBufferSize > 0 &&
+                                channel.countOfAvailableMessages() >= channelMaxBufferSize
+                        );
     }
 
 }
