@@ -7,4 +7,5 @@ public interface Transporter<T> {
     List<Channel<T>> getChannels();
     void publishMessage(T msg);
     void closeChannel();
+    boolean isOverloaded();
 }

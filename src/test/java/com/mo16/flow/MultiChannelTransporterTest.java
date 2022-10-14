@@ -17,7 +17,8 @@ class MultiChannelTransporterTest {
 
         when(loadBalancer.selectChannel()).thenReturn(channel);
 
-        var transporter = new MultiChannelTransporter<>(loadBalancer);
+        var configs = new BackPressureConfigs(-1, -1);
+        var transporter = new MultiChannelTransporter<>(loadBalancer, configs);
         transporter.addChannel(channel);
         transporter.publishMessage(1);
 
@@ -33,7 +34,8 @@ class MultiChannelTransporterTest {
         Channel<Integer> channel_3 = mock(Channel.class);
         LoadBalancer<Integer> loadBalancer = mock(LoadBalancer.class);
 
-        var transporter = new MultiChannelTransporter<>(loadBalancer);
+        var configs = new BackPressureConfigs(-1, -1);
+        var transporter = new MultiChannelTransporter<>(loadBalancer, configs);
 
         transporter.addChannel(channel_1);
         transporter.addChannel(channel_2);

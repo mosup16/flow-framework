@@ -38,6 +38,11 @@ public class FiltrationStep<I> implements Step<I, I> {
     }
 
     @Override
+    public boolean isOverloaded() {
+        return transporter.isOverloaded();
+    }
+
+    @Override
     public void setTransporter(Transporter<I> transporter) {
         this.transporter = transporter;
     }

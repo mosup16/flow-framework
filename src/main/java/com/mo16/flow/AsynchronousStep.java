@@ -57,6 +57,12 @@ public class AsynchronousStep<T> implements ProcessingStep<T, T> {
     public void channelClosed() {
         channelClosed = true;
     }
+
+    @Override
+    public boolean isOverloaded() {
+        return transporter.isOverloaded();
+    }
+
     @Override
     public Step<T, T> copy() {
         AsynchronousStep<T> step = new AsynchronousStep<>(this.executorService);

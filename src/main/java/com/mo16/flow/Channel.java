@@ -19,5 +19,7 @@ public interface Channel<T> {
     void close();
 
     boolean isClosed();
+
+    boolean isOverloaded();
 }
 

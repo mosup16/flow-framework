@@ -10,4 +10,6 @@ public interface ChannelSubscriber<I> {
     I pollMessage();
 
     void channelClosed();
+
+    boolean isOverloaded();
 }

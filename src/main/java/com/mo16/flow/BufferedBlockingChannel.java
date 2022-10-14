@@ -28,7 +28,12 @@ public class BufferedBlockingChannel<T> implements Channel<T> {
 
     @Override
     public T poll() {
+
         try {
+            if (isOverloaded()) {
+                this.wait(100);
+                return null;
+            }
             return queue.poll(100, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -74,6 +79,11 @@ public class BufferedBlockingChannel<T> implements Channel<T> {
     @Override
     public boolean isClosed() {
         return closed;
+    }
+
+    @Override
+    public boolean isOverloaded() {
+        return subscriber.isOverloaded();
     }
 
     public void startSubscriber() {

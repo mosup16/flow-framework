@@ -19,6 +19,7 @@ public class Flow<T> {
     private List<Channel<T>> pipelineLastChannels;
     private ExecutorService executorService;
     private boolean isParallel = false;
+    private BackPressureConfigs backPressureConfigs;
 
     private Flow() {
 
@@ -31,7 +32,8 @@ public class Flow<T> {
 
         DataSource<O> source = DataSource.newIterableDataSource(iterable);
 
-        Transporter<O> transporter = new SingleChannelTransporter<>();
+        var defaultBackPressureConfigs = new BackPressureConfigs(-1, -1);
+        Transporter<O> transporter = new SingleChannelTransporter<>(defaultBackPressureConfigs);
         source.setTransporter(transporter);
 
         Channel<O> dataSourceChannel = new SingularMessageChannel<>();
@@ -44,6 +46,7 @@ public class Flow<T> {
         List<Channel<O>> channels = new LinkedList<>();
         channels.add(dataSourceChannel);
         flow.pipelineLastChannels = channels;
+        flow.backPressureConfigs = defaultBackPressureConfigs;
         return flow;
     }
 
@@ -71,7 +74,7 @@ public class Flow<T> {
 
         for (Channel<T> channel : this.pipelineLastChannels) {
             LoadBalancer<T> loadBalancer = loadBalancerFactory.getInstanceFor(loadBalancingStrategy);
-            var transporter = new MultiChannelTransporter<T>(loadBalancer);
+            var transporter = new MultiChannelTransporter<T>(loadBalancer, this.backPressureConfigs);
             for (int i = 0; i < numOfThreads; i++)
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
@@ -109,7 +112,7 @@ public class Flow<T> {
             step.subscribeTo(channelTobeSubscribedTo);
             channelTobeSubscribedTo.setSubscriber(step);
 
-            Transporter<O> transporter = new SingleChannelTransporter<>();
+            Transporter<O> transporter = new SingleChannelTransporter<>(this.backPressureConfigs);
             SingularMessageChannel<O> queue = new SingularMessageChannel<>();
             transporter.addChannel(queue);
             step.setTransporter(transporter);
@@ -121,6 +124,7 @@ public class Flow<T> {
         flow.pipelineLastChannels = newPipelineLastChannels;
         flow.isParallel = sourceFlow.isParallel;
         flow.executorService = sourceFlow.executorService;
+        flow.backPressureConfigs = sourceFlow.backPressureConfigs;
         return flow;
     }
 

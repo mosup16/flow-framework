@@ -67,4 +67,9 @@ public class SingularMessageChannel<T> implements Channel<T> {
         return closed;
     }
 
+    @Override
+    public boolean isOverloaded() {
+        return subscriber.isOverloaded();
+    }
+
 }

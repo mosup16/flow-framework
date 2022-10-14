@@ -4,8 +4,10 @@ import java.util.List;
 
 public class SingleChannelTransporter<T> implements Transporter<T> {
     private Channel<T> channel;
+    private final Long channelMaxBufferSize;
 
-    public SingleChannelTransporter(){
+    public SingleChannelTransporter(BackPressureConfigs configs){
+        channelMaxBufferSize = configs.getChannelMaxBufferSize();
     }
 
     @Override
@@ -26,5 +28,11 @@ public class SingleChannelTransporter<T> implements Transporter<T> {
     @Override
     public void closeChannel() {
         channel.close();
+    }
+
+    @Override
+    public boolean isOverloaded() {
+        return (channelMaxBufferSize > 0 && channel.countOfAvailableMessages() >= channelMaxBufferSize)
+                || channel.isOverloaded();
     }
 }

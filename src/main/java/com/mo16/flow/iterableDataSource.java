@@ -16,6 +16,14 @@ public class iterableDataSource<O> implements DataSource<O> {
     @Override
     public void generate() {
         while (!completed && iterator.hasNext()) {
+            if (isOverloaded()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                continue;
+            }
             O msg = iterator.next();
             transporter.publishMessage(msg);
         }
@@ -41,5 +49,10 @@ public class iterableDataSource<O> implements DataSource<O> {
 
     private void setCompleted() {
         this.completed = true;
+    }
+
+    @Override
+    public boolean isOverloaded() {
+        return transporter.isOverloaded();
     }
 }

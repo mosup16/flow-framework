@@ -44,5 +44,10 @@ public class SynchronousDataSink<I> implements DataSink<I> {
         return;
     }
 
+    @Override
+    public boolean isOverloaded() {
+        return false;
+    }
+
 
 }

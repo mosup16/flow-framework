@@ -52,6 +52,11 @@ public class SynchronousStep<I, O> implements ProcessingStep<I, O> {
     }
 
     @Override
+    public boolean isOverloaded() {
+        return transporter.isOverloaded();
+    }
+
+    @Override
     public void setTransporter(Transporter<O> transporter) {
         this.transporter = transporter;
     }

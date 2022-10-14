@@ -11,4 +11,6 @@ public interface DataSource<O> {
     }
 
     boolean isCompleted();
+
+    boolean isOverloaded();
 }

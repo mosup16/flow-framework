@@ -10,7 +10,8 @@ class SingleChannelTransporterTest {
     @Test
     @DisplayName("test message publishing via SingleChannelTransporter")
     void publishMessage() {
-        var transporter = new SingleChannelTransporter<Integer>();
+        var configs = new BackPressureConfigs(-1, -1);
+        var transporter = new SingleChannelTransporter<Integer>(configs);
         Channel<Integer> channel = mock(Channel.class);
         transporter.addChannel(channel);
         transporter.publishMessage(1);
@@ -20,7 +21,8 @@ class SingleChannelTransporterTest {
     @Test
     @DisplayName("test channel closing via SingleChannelTransporter")
     void closeChannel() {
-        var transporter = new SingleChannelTransporter<Integer>();
+        var configs = new BackPressureConfigs(-1, -1);
+        var transporter = new SingleChannelTransporter<Integer>(configs);
         Channel<Integer> channel = mock(Channel.class);
         transporter.addChannel(channel);
         transporter.closeChannel();
