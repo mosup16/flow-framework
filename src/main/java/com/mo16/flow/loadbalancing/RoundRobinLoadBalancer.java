@@ -20,4 +20,12 @@ public class RoundRobinLoadBalancer<T> implements LoadBalancer<T> {
         nextChannel++;
         return channel;
     }
+
+    @Override
+    public Channel<T> removeChannel(Channel<T> channel) throws IllegalArgumentException {
+        boolean removed = channels.remove(channel);
+        if (removed)
+            return channel;
+        else throw new IllegalArgumentException("provided channel can't be removed");
+    }
 }

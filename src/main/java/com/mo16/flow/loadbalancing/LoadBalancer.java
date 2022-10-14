@@ -8,4 +8,6 @@ public interface LoadBalancer<T> {
 
     Channel<T> selectChannel();
 
+    Channel<T> removeChannel(Channel<T> channel) throws IllegalArgumentException;
+
 }
