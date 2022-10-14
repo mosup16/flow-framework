@@ -25,15 +25,18 @@ public class Flow<T> {
 
     }
 
+    public static <O> Flow<O> of(Iterable<O> iterable){
+        var defaultBackPressureConfigs = new BackPressureConfigs(-1, -1);
+        return of(iterable, defaultBackPressureConfigs);
+    }
 
-    static <O> Flow<O> of(Iterable<O> iterable) {
+    public static <O> Flow<O> of(Iterable<O> iterable, BackPressureConfigs backPressureConfigs) {
 
         Flow<O> flow = new Flow<>();
 
         DataSource<O> source = DataSource.newIterableDataSource(iterable);
 
-        var defaultBackPressureConfigs = new BackPressureConfigs(-1, -1);
-        Transporter<O> transporter = new SingleChannelTransporter<>(defaultBackPressureConfigs);
+        Transporter<O> transporter = new SingleChannelTransporter<>(backPressureConfigs);
         source.setTransporter(transporter);
 
         Channel<O> dataSourceChannel = new SingularMessageChannel<>();
@@ -46,7 +49,7 @@ public class Flow<T> {
         List<Channel<O>> channels = new LinkedList<>();
         channels.add(dataSourceChannel);
         flow.pipelineLastChannels = channels;
-        flow.backPressureConfigs = defaultBackPressureConfigs;
+        flow.backPressureConfigs = backPressureConfigs;
         return flow;
     }
 
