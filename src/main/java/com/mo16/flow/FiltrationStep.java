@@ -59,7 +59,7 @@ public class FiltrationStep<I> implements Step<I, I> {
         for (int i = 0; i < numberOfMessages; i++) {
             if (this.getSourceChannel().hasAvailableMessages()) {
                 I msg = pollMessage();
-                if (filter.test(msg))
+                if (getFilter().test(msg))
                     this.getTransporter().publishMessage(msg);
             } else break;
         }

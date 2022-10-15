@@ -69,7 +69,7 @@ public class Flow<T> {
 
     public <O> Flow<O> parallelMap(int numOfThreads, LoadBalancingStrategy loadBalancingStrategy,
                                    Function<T, O> function) {
-        if (isParallel)
+        if (isParallel())
             return map(function);
 
         var loadBalancerFactory = new LoadBalancerFactory<T>();
@@ -77,7 +77,7 @@ public class Flow<T> {
 
         for (Channel<T> channel : this.pipelineLastChannels) {
             LoadBalancer<T> loadBalancer = loadBalancerFactory.getInstanceFor(loadBalancingStrategy);
-            var transporter = new MultiChannelTransporter<T>(loadBalancer, this.backPressureConfigs);
+            var transporter = new MultiChannelTransporter<>(loadBalancer, this.backPressureConfigs);
             for (int i = 0; i < numOfThreads; i++)
                 transporter.addChannel(new BufferedBlockingChannel<>());
             newPipelineLastChannels.addAll(transporter.getChannels());
@@ -90,7 +90,7 @@ public class Flow<T> {
         }
 
         executorService = Executors.newFixedThreadPool(numOfThreads);
-        ProcessingStep<T, T> parallelStep = new AsynchronousStep<T>(executorService);
+        ProcessingStep<T, T> parallelStep = new AsynchronousStep<>(executorService);
         parallelStep.setMessageProcessor(t -> t);
         Flow<O> flow = chainStep(parallelStep, newPipelineLastChannels, this)
                 .map(function);
@@ -110,7 +110,7 @@ public class Flow<T> {
                                   List<Channel<T>> pipelineLastChannels, Flow<T> sourceFlow) {
         Flow<O> flow = new Flow<>();
         LinkedList<Channel<O>> newPipelineLastChannels = new LinkedList<>();
-        for (Channel channelTobeSubscribedTo : pipelineLastChannels) {
+        for (Channel<T> channelTobeSubscribedTo : pipelineLastChannels) {
             Step<T, O> step = stepTobeChained.copy();
             step.subscribeTo(channelTobeSubscribedTo);
             channelTobeSubscribedTo.setSubscriber(step);
@@ -133,7 +133,7 @@ public class Flow<T> {
 
 
     public void forEach(Consumer<T> consumer) {
-        for (Channel channel : this.pipelineLastChannels) {
+        for (Channel<T> channel : this.pipelineLastChannels) {
             SynchronousDataSink<T> sink = new SynchronousDataSink<>();
             channel.setSubscriber(sink);
             sink.subscribeTo(channel);
