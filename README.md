@@ -44,4 +44,27 @@ pressure
                 .map(integer -> "hi : " + integer)
                 .forEach(x -> System.out.println(Thread.currentThread().getId() + " :" + x));
 
-Thanks for reading.
+#### To define a round robin load balancing strategy 
+```
+	.parallelMap(numOfThreads, LoadBalancingStrategy.ROUND_ROBIN , func)
+```
+also note that round robin is the default strategy.
+
+#### To define a least buffer size load balancing strategy
+```
+	.parallelMap(numOfThreads, LoadBalancingStrategy.LEAST_BUFFER_SIZE , func)
+```
+this strategy tries to pick the least busy thread with the least buffer size every time 
+#### To configure back pressure
+```
+   var configs = new BackPressureConfigs(maxBufferSizePerThread, maxBufferedMessagesForAllThreads);
+   Flow.of(data, configs)
+```
+If the bufferd messages of any thread reached ``maxBufferSizePerThread`` ,
+then this thread will be overloaded and the load will be shifted away to other threads.
+
+If all threads were overloaded or the count of all buffered messages for all threads reached ``maxBufferedMessagesForAllThreads``,
+then the flow will be throttled and the ``DataSource`` implementation will define the throttling behaviour.
+
+**Note that if any of ``maxBufferSizePerThread`` or ``maxBufferedMessagesForAllThreads`` variables was given a value less than 1,
+this means that they will be ignored and considered as if they were infinity.**
