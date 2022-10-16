@@ -28,11 +28,10 @@ pressure
 
 ### How to use it (Quick Guide 😄 )
 
-#### Generate some data for testing the library
+##### Generate some data for testing the library
 
 ```
-
-       var data = IntStream.range(0, 100000)
+       var data = IntStream.range(0, 1000)
                     .boxed()
                     .collect(Collectors.toList());
 ```
@@ -40,7 +39,6 @@ pressure
 ##### Define a function that simulates a long running task
 
 ````
-
         Function<Integer, Integer> func = integer -> {
             try {
                 Thread.sleep(100);
@@ -49,7 +47,6 @@ pressure
             }
             return integer + 1;
         };
-
 ````
 
 ##### The library exposes a very familiar api and it can be used as follows
