@@ -1,6 +1,24 @@
-# Flow Framework [![Maven Central](https://img.shields.io/maven-central/v/io.github.mosup16/flow-framework.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.mosup16%22%20AND%20a:%22flow-framework%22)
-A framework that aims to implement a reactive programming model
+# Flow Framework [![Maven Central](https://img.shields.io/maven-central/v/io.github.mosup16/flow-framework.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.mosup16%22%20AND%20a:%22flow-framework%22)  [![](https://jitpack.io/v/mosup16/flow-framework.svg)](https://jitpack.io/#mosup16/flow-framework)
+A framework that Implements and facilitates reactive programming with a support for parallel processing and back
+pressure
 
+#### to get the dependency for maven add JitPack repository
+```    
+         <repositories>
+		<repository>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+         </repositories>
+```
+#### and then add the following dependency to your pom.xml 
+```
+	<dependency>
+	    <groupId>com.github.mosup16</groupId>
+	    <artifactId>flow-framework</artifactId>
+	    <version>439d7dd0b4</version>
+	</dependency>
+```
 #### Generate some data for testing the library
 
        var data = IntStream.range(0, 1000)
